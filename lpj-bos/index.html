@@ -120,12 +120,16 @@
       let filename = "";
       
       if(type === 'bku') {
-        headers = "TANGGAL,KODE KEGIATAN,KODE REKENING,NO. BUKTI,URAIAN,PENERIMAAN,PENGELUARAN,SALDO\n";
+        // GANTI koma menjadi titik koma (;) di baris ini:
+        headers = "TANGGAL;KODE KEGIATAN;KODE REKENING;NO. BUKTI;URAIAN;PENERIMAAN;PENGELUARAN;SALDO\n";
         filename = "Template_Upload_BKU.csv";
       } else if(type === 'arkas') {
-        headers = "No_Urut,Kode_Rekening,Kode_Program_1,Kode_Program_2,Kode_Program_3,Uraian,Volume,Satuan,Tarif_Harga,Jumlah_Total,Tahap_1,Tahap_2\n";
+        // GANTI koma menjadi titik koma (;) di baris ini:
+        headers = "No_Urut;Kode_Rekening;Kode_Program_1;Kode_Program_2;Kode_Program_3;Uraian;Volume;Satuan;Tarif_Harga;Jumlah_Total;Tahap_1;Tahap_2\n";
         filename = "Template_Upload_ARKAS.csv";
       }
+      
+      // ... (kode ke bawahnya tetap sama)
 
       // Membuat file CSV agar bisa langsung diunduh
       const blob = new Blob([headers], { type: 'text/csv;charset=utf-8;' });
