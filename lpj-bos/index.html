@@ -7,41 +7,158 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   <style>
-    body { background-color: #f4f6f9; }
-    .nav-pills .nav-link.active { background-color: #0d6efd; }
+    body { background-color: #f4f6f9; font-size: 0.92rem; }
+    .nav-pills .nav-link.active { background-color: #0d6efd; font-weight: 600; }
     .card-header { background-color: #fff; border-bottom: 2px solid #f4f6f9; }
-    .table-responsive { max-height: 400px; overflow-y: auto; }
-    .table-sm th, .table-sm td { font-size: 0.85rem; }
+    .table-responsive { max-height: 480px; overflow-y: auto; }
+    .table-sm th, .table-sm td { font-size: 0.82rem; vertical-align: middle; }
+    .sticky-thead th { position: sticky; top: 0; background-color: #f8f9fa; z-index: 2; box-shadow: inset 0 -1px 0 #dee2e6; }
+
+    /* Styling Khusus Lembar Kerja Cetak LPJ / Kwitansi / Nota */
+    #preview-cetak-wrapper {
+      background: #525659;
+      padding: 25px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    .kertas-a4 {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 12mm 15mm;
+      margin: 0 auto;
+      background: #fff;
+      color: #000;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 11pt;
+      box-sizing: border-box;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.35);
+    }
+    .kwitansi-box {
+      border: 2px solid #000;
+      padding: 12px 16px;
+      margin-bottom: 18px;
+    }
+    .kwitansi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .kwitansi-title {
+      font-size: 15pt;
+      font-weight: bold;
+      text-decoration: underline;
+      letter-spacing: 2px;
+      text-align: center;
+      flex-grow: 1;
+    }
+    .tabel-info-kwitansi {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 12px;
+    }
+    .tabel-info-kwitansi td {
+      padding: 3px 4px;
+      vertical-align: top;
+      font-size: 10.5pt;
+    }
+    .tabel-lpj {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      margin-bottom: 14px;
+    }
+    .tabel-lpj th, .tabel-lpj td {
+      border: 1px solid #000;
+      padding: 4px 6px;
+      font-size: 9.5pt;
+      vertical-align: middle;
+    }
+    .tabel-lpj th {
+      background-color: #f0f0f0;
+      text-align: center;
+      font-weight: bold;
+    }
+    .ttd-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      text-align: center;
+      font-size: 10pt;
+      margin-top: 10px;
+    }
+    .ttd-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      text-align: center;
+      font-size: 10pt;
+      margin-top: 14px;
+    }
+    .garis-potong {
+      border-top: 1px dashed #666;
+      margin: 18px 0;
+      position: relative;
+    }
+
+    /* Mode Print Browser Langsung (Ctrl+P / Tombol Print Presisi) */
+    @media print {
+      body * { visibility: hidden; }
+      #print-area-a4, #print-area-a4 * { visibility: visible; }
+      #print-area-a4 {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        box-shadow: none !important;
+      }
+      .garis-potong { border-top: 1px dashed #999; }
+      @page { size: A4 portrait; margin: 10mm; }
+    }
   </style>
 </head>
 <body>
 
   <!-- Navbar Atas -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm d-print-none">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#"><i class="bi bi-wallet2"></i> SPJ BOS SDN 1 Sukahaji</a>
+      <a class="navbar-brand fw-bold" href="#"><i class="bi bi-wallet2 me-2"></i>SPJ BOS SDN 1 Sukahaji</a>
+      <span class="navbar-text text-white small">Sistem Informasi Perencanaan & Realisasi Dana BOSP</span>
     </div>
   </nav>
 
-  <div class="container-fluid mt-4">
+  <div class="container-fluid mt-3 d-print-none">
     <div class="row">
       
       <!-- Sidebar Navigasi -->
       <div class="col-md-3 col-lg-2 mb-4">
         <div class="card shadow-sm">
           <div class="card-body p-2">
-            <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-              <button class="nav-link active text-start mb-1" id="tab-dashboard" data-bs-toggle="pill" data-bs-target="#content-dashboard" type="button" role="tab"><i class="bi bi-house-door"></i> Dashboard</button>
+            <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist">
+              <button class="nav-link active text-start mb-1" data-bs-toggle="pill" data-bs-target="#content-dashboard" type="button" role="tab">
+                <i class="bi bi-house-door me-1"></i> Dashboard
+              </button>
               
               <hr class="my-2">
               <small class="text-muted px-2 fw-bold">DATA TRANSAKSI</small>
-              <button class="nav-link text-start mb-1 mt-1" id="tab-bku" data-bs-toggle="pill" data-bs-target="#content-bku" type="button" role="tab" onclick="loadTableData('DB_BKU')"><i class="bi bi-journal-text"></i> Data BKU & ARKAS</button>
-              <button class="nav-link text-start mb-1" id="tab-cetak" data-bs-toggle="pill" data-bs-target="#content-cetak" type="button" role="tab"><i class="bi bi-printer"></i> Penyesuaian & Cetak</button>
+              <button class="nav-link text-start mb-1 mt-1" data-bs-toggle="pill" data-bs-target="#content-bku" type="button" role="tab" onclick="loadTableData(document.getElementById('select-table-bku-arkas').value)">
+                <i class="bi bi-journal-text me-1"></i> Data BKU & ARKAS
+              </button>
+              <button class="nav-link text-start mb-1" data-bs-toggle="pill" data-bs-target="#content-cetak" type="button" role="tab" onclick="initMenuCetak()">
+                <i class="bi bi-printer me-1"></i> Penyesuaian & Cetak
+              </button>
               
               <hr class="my-2">
               <small class="text-muted px-2 fw-bold">MASTER DATA</small>
-              <button class="nav-link text-start mb-1 mt-1" id="tab-pegawai" data-bs-toggle="pill" data-bs-target="#content-pegawai" type="button" role="tab" onclick="loadTableData('Master_Pegawai')"><i class="bi bi-people"></i> Master Pegawai</button>
-              <button class="nav-link text-start mb-1" id="tab-toko" data-bs-toggle="pill" data-bs-target="#content-toko" type="button" role="tab" onclick="loadTableData('Master_Toko')"><i class="bi bi-shop"></i> Master Toko</button>
+              <button class="nav-link text-start mb-1 mt-1" data-bs-toggle="pill" data-bs-target="#content-pegawai" type="button" role="tab" onclick="loadTableData('Master_Pegawai')">
+                <i class="bi bi-people me-1"></i> Master Pegawai
+              </button>
+              <button class="nav-link text-start mb-1" data-bs-toggle="pill" data-bs-target="#content-toko" type="button" role="tab" onclick="loadTableData('Master_Toko')">
+                <i class="bi bi-shop me-1"></i> Master Toko
+              </button>
+              <button class="nav-link text-start mb-1" data-bs-toggle="pill" data-bs-target="#content-pejabat" type="button" role="tab">
+                <i class="bi bi-person-badge me-1"></i> Pejabat Sekolah
+              </button>
             </div>
           </div>
         </div>
@@ -49,71 +166,94 @@
 
       <!-- Area Konten Utama -->
       <div class="col-md-9 col-lg-10">
-        <div class="tab-content" id="v-pills-tabContent">
+        <div class="tab-content">
           
-          <!-- Konten Dashboard -->
+          <!-- 1. KONTEN DASHBOARD -->
           <div class="tab-pane fade show active" id="content-dashboard" role="tabpanel">
-            <div class="card shadow-sm">
-              <div class="card-body text-center py-5">
-                <h3>Selamat Datang di Sistem SPJ BOS</h3>
-                <p class="text-muted">Gunakan menu di samping untuk mengelola data perencanaan dan realisasi.</p>
-                <div id="connection-status" class="alert alert-success d-inline-block mt-3">
-                  <i class="bi bi-check-circle"></i> Sistem Siap Digunakan
+            <div class="card shadow-sm mb-3">
+              <div class="card-body py-4">
+                <h4 class="fw-bold text-primary mb-1">Selamat Datang di Aplikasi Manajemen LPJ BOSP — SDN 1 Sukahaji</h4>
+                <p class="text-muted mb-3">Kelola database RKAS, BKU, Master Pegawai, Master Toko, dan cetak otomatis Kwitansi, Daftar Penerima Honor/Transport/Upah, serta Nota Barang.</p>
+                <div class="row g-3" id="ringkasan-dashboard">
+                  <div class="col-md-4">
+                    <div class="p-3 border rounded bg-light">
+                      <div class="text-muted small">Total Baris BKU</div>
+                      <h4 class="fw-bold mb-0 text-primary" id="stat-bku">Memuat...</h4>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="p-3 border rounded bg-light">
+                      <div class="text-muted small">Total Rincian ARKAS</div>
+                      <h4 class="fw-bold mb-0 text-success" id="stat-arkas">Memuat...</h4>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="p-3 border rounded bg-light">
+                      <div class="text-muted small">Data Master Pegawai & Toko</div>
+                      <h4 class="fw-bold mb-0 text-dark" id="stat-master">Memuat...</h4>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Konten BKU & ARKAS (Upload & CRUD Tabel) -->
+          <!-- 2. KONTEN DATA BKU & ARKAS (UPLOAD + FULL CRUD) -->
           <div class="tab-pane fade" id="content-bku" role="tabpanel">
-            <div class="card shadow-sm mb-4">
-              <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Kelola Data BKU & ARKAS</h5>
+            <div class="card shadow-sm mb-3">
+              <div class="card-header d-flex justify-content-between align-items-center py-2">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-cloud-arrow-up me-1"></i> Import / Export Template CSV (BKU & ARKAS)</h6>
               </div>
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-md-6 mb-3">
-                    <div class="border rounded p-3 text-center h-100">
-                      <h6>Data BKU (Buku Kas Umum)</h6>
-                      <p class="small text-muted">Unduh template CSV, isi datanya, lalu upload kembali ke sistem.</p>
+              <div class="card-body py-3">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <div class="border rounded p-3 text-center h-100 bg-light">
+                      <h6 class="fw-bold">Data BKU (Buku Kas Umum)</h6>
+                      <p class="small text-muted mb-2">Menambah data realisasi baru dengan validasi anti-duplikat.</p>
                       <button class="btn btn-outline-primary btn-sm mb-2" onclick="downloadTemplate('bku')"><i class="bi bi-download"></i> Unduh Template BKU</button>
-                      <input class="form-control form-control-sm mt-2" type="file" id="file-bku" accept=".csv">
+                      <input class="form-control form-control-sm" type="file" id="file-bku" accept=".csv">
                       <button class="btn btn-success btn-sm w-100 mt-2" onclick="uploadData('DB_BKU')"><i class="bi bi-upload"></i> Upload BKU</button>
                     </div>
                   </div>
-                  <div class="col-md-6 mb-3">
-                    <div class="border rounded p-3 text-center h-100">
-                      <h6>Data ARKAS (Perencanaan)</h6>
-                      <p class="small text-muted">Upload data hasil ekspor Kertas Kerja ARKAS di sini.</p>
+                  <div class="col-md-6">
+                    <div class="border rounded p-3 text-center h-100 bg-light">
+                      <h6 class="fw-bold">Data ARKAS (Kertas Kerja Perencanaan)</h6>
+                      <p class="small text-muted mb-2">Menyinkronkan data rincian volume & harga satuan dari ARKAS.</p>
                       <button class="btn btn-outline-primary btn-sm mb-2" onclick="downloadTemplate('arkas')"><i class="bi bi-download"></i> Unduh Template ARKAS</button>
-                      <input class="form-control form-control-sm mt-2" type="file" id="file-arkas" accept=".csv">
-                      <button class="btn btn-success btn-sm w-100 mt-2" onclick="uploadData('DB_RKAS')"><i class="bi bi-upload"></i> Upload ARKAS</button>
+                      <input class="form-control form-control-sm" type="file" id="file-arkas" accept=".csv">
+                      <button class="btn btn-success btn-sm w-100 mt-2" onclick="uploadData('DB_ARKAS')"><i class="bi bi-upload"></i> Upload ARKAS</button>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Tabel Data BKU & ARKAS -->
+            <!-- Tabel Full CRUD BKU & ARKAS -->
             <div class="card shadow-sm">
-              <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 text-primary"><i class="bi bi-table"></i> Database Transaksi</h5>
-                <div>
-                  <select class="form-select form-select-sm d-inline-block w-auto" id="select-table-bku-arkas" onchange="loadTableData(this.value)">
-                    <option value="DB_BKU">Data BKU</option>
-                    <option value="DB_RKAS">Data ARKAS</option>
+              <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2 py-2">
+                <div class="d-flex align-items-center gap-2">
+                  <h6 class="mb-0 text-primary fw-bold"><i class="bi bi-table me-1"></i> Tabel Database:</h6>
+                  <select class="form-select form-select-sm w-auto fw-bold border-primary" id="select-table-bku-arkas" onchange="loadTableData(this.value)">
+                    <option value="DB_BKU">Data BKU (DB_BKU)</option>
+                    <option value="DB_ARKAS">Data ARKAS (DB_ARKAS)</option>
                   </select>
-                  <button class="btn btn-primary btn-sm ms-2" onclick="loadTableData(document.getElementById('select-table-bku-arkas').value)"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <input type="text" id="filter-bku-arkas" class="form-control form-control-sm" placeholder="Cari No Bukti / Uraian..." oninput="filterTableRows('bku-arkas', this.value)">
+                  <button class="btn btn-success btn-sm text-nowrap" onclick="bukaModalTambah(document.getElementById('select-table-bku-arkas').value)">
+                    <i class="bi bi-plus-lg"></i> Tambah Baris
+                  </button>
+                  <button class="btn btn-primary btn-sm text-nowrap" onclick="loadTableData(document.getElementById('select-table-bku-arkas').value)">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                  </button>
                 </div>
               </div>
-              <div class="card-body">
+              <div class="card-body p-0">
                 <div class="table-responsive">
-                  <table class="table table-bordered table-hover table-sm table-striped" id="table-bku-arkas">
-                    <thead class="table-light" id="thead-bku-arkas">
-                      <!-- Header Tabel dinamis -->
-                    </thead>
+                  <table class="table table-bordered table-hover table-sm table-striped mb-0">
+                    <thead class="sticky-thead" id="thead-bku-arkas"></thead>
                     <tbody id="tbody-bku-arkas">
-                      <tr><td colspan="100%" class="text-center text-muted">Memuat data...</td></tr>
+                      <tr><td colspan="100%" class="text-center py-4 text-muted">Memuat data...</td></tr>
                     </tbody>
                   </table>
                 </div>
@@ -121,151 +261,226 @@
             </div>
           </div>
 
-          <!-- Konten Penyesuaian & Cetak -->
+          <!-- 3. KONTEN PENYESUAIAN & CETAK LPJ -->
           <div class="tab-pane fade" id="content-cetak" role="tabpanel">
             <div class="card shadow-sm border-primary mb-4">
-              <div class="card-header bg-white">
-                <h5 class="mb-0 text-primary"><i class="bi bi-printer"></i> Penyesuaian & Cetak Dokumen SPJ</h5>
+              <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-primary fw-bold"><i class="bi bi-printer me-1"></i> Panel Penyesuaian & Cetak Dokumen LPJ BOSP</h5>
               </div>
               <div class="card-body">
                 
-                <!-- 1. Form Pencarian BPU -->
-                <div class="row mb-4 bg-light p-3 rounded">
-                  <div class="col-md-6">
-                    <label class="form-label fw-bold">Cari Berdasarkan NO. BUKTI (Sesuai BKU)</label>
+                <!-- 1. Pencarian BPU -->
+                <div class="row g-3 mb-3 bg-light p-3 rounded border">
+                  <div class="col-md-5">
+                    <label class="form-label fw-bold mb-1">Pilih dari Daftar NO. BUKTI BKU</label>
+                    <select id="dropdown-bpu" class="form-select" onchange="document.getElementById('search-bpu').value=this.value; cariBPU();">
+                      <option value="">-- Memuat daftar BPU... --</option>
+                    </select>
+                  </div>
+                  <div class="col-md-5">
+                    <label class="form-label fw-bold mb-1">Atau Ketik NO. BUKTI Manual</label>
                     <div class="input-group">
-                      <span class="input-group-text"><i class="bi bi-search"></i></span>
-                      <input type="text" id="search-bpu" class="form-control" placeholder="Contoh: BPU172" onkeypress="if(event.key === 'Enter') cariBPU()">
-                      <button class="btn btn-primary" onclick="cariBPU()" id="btn-cari">Cari Data</button>
+                      <input type="text" id="search-bpu" class="form-control" placeholder="Contoh: BPU172 atau BPU189" onkeypress="if(event.key === 'Enter') cariBPU()">
+                      <button class="btn btn-primary" onclick="cariBPU()" id="btn-cari"><i class="bi bi-search"></i> Tarik Data</button>
                     </div>
+                  </div>
+                  <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-outline-secondary w-100" onclick="initMenuCetak(true)"><i class="bi bi-arrow-repeat"></i> Reload BKU</button>
                   </div>
                 </div>
 
-                <!-- 2. Area Hasil Pencarian -->
+                <!-- 2. Area Hasil Pencarian BPU -->
                 <div id="area-hasil-bpu" class="d-none">
-                  <div class="alert alert-success border-success mb-4">
-                    <div class="row">
-                      <div class="col-md-3"><strong>Tanggal:</strong> <br><span id="info-tanggal">-</span></div>
-                      <div class="col-md-3"><strong>No. Bukti:</strong> <br><span id="info-nobukti" class="fs-5 fw-bold text-dark">-</span></div>
-                      <div class="col-md-6"><strong>Total Pengeluaran:</strong> <br><span id="info-nominal" class="fs-5 fw-bold text-danger">-</span></div>
-                      <div class="col-md-12 mt-2 pt-2 border-top border-success">
-                        <strong>Uraian BKU:</strong> <br><span id="info-uraian" class="fst-italic">-</span>
+                  
+                  <!-- Ringkasan Data BKU -->
+                  <div class="alert alert-success border-success mb-3">
+                    <div class="row g-2">
+                      <div class="col-md-2"><strong>No. Bukti:</strong><br><span id="info-nobukti" class="fs-5 fw-bold text-dark">-</span></div>
+                      <div class="col-md-3"><strong>Tanggal BKU:</strong><br><span id="info-tanggal" class="fw-semibold">-</span></div>
+                      <div class="col-md-3"><strong>Kode Keg / Rek:</strong><br><span id="info-kode" class="small font-monospace">-</span></div>
+                      <div class="col-md-4"><strong>Total Pengeluaran BKU:</strong><br><span id="info-nominal" class="fs-5 fw-bold text-danger">-</span></div>
+                      <div class="col-md-12 pt-2 border-top border-success">
+                        <strong>Uraian BKU:</strong> <span id="info-uraian" class="fst-italic">-</span>
                       </div>
                     </div>
                   </div>
 
-                  <!-- 3. Pilihan Jenis SPJ -->
-                  <div class="mb-3 p-3 border rounded border-warning">
-                    <label class="form-label fw-bold text-dark">Langkah 1: Pilih Output Dokumen LPJ</label>
-                    <select id="jenis-spj" class="form-select border-warning" onchange="ubahTampilanRincian()">
-                      <option value="">-- Pilih Jenis Transaksi --</option>
-                      <option value="jasa">BELANJA JASA (Kwitansi + Daftar Penerima Honor/Transport)</option>
-                      <option value="barang">BELANJA BARANG (Kwitansi + Nota Toko)</option>
-                    </select>
+                  <!-- Referensi Rincian dari ARKAS yang Cocok -->
+                  <div class="card mb-3 border-info">
+                    <div class="card-header bg-info bg-opacity-10 py-2 d-flex justify-content-between align-items-center">
+                      <span class="fw-bold text-dark small"><i class="bi bi-link-45deg"></i> Referensi Rincian di DB_ARKAS (Berdasarkan Kode Kegiatan & Kode Rekening)</span>
+                      <span class="badge bg-info text-dark" id="badge-arkas-match">0 item cocok</span>
+                    </div>
+                    <div class="card-body p-2" id="box-referensi-arkas" style="max-height:140px; overflow-y:auto; font-size:0.82rem;">
+                      -
+                    </div>
                   </div>
 
-                  <!-- 4. Area Rincian Penyesuaian Dinamis -->
-                  <div id="area-rincian" class="d-none">
-                    <h5 class="fw-bold mt-4 mb-3" id="judul-rincian">Langkah 2: Penyesuaian Rincian</h5>
-                    
-                    <!-- Panel Jasa -->
-                    <div id="panel-jasa" class="d-none">
-                       <div class="mb-3">
-                         <label class="form-label">Judul Daftar Penerima:</label>
-                         <input type="text" class="form-control" id="judul-daftar-jasa" value="DAFTAR BIAYA PERJALANAN DINAS TARIK TUNAI DANA BOSP">
-                       </div>
-                       <table class="table table-bordered table-sm">
-                         <thead class="table-light">
-                           <tr>
-                             <th>Pilih Pegawai</th>
-                             <th>Volume</th>
-                             <th>Harga Satuan (Rp)</th>
-                             <th>PPh 21 (Rp)</th>
-                             <th>Aksi</th>
-                           </tr>
-                         </thead>
-                         <tbody id="tbody-rincian-jasa">
-                           <!-- Baris dinamis ditambahkan via JS -->
-                         </tbody>
-                         <tfoot>
-                           <tr>
-                             <td colspan="5">
-                               <button class="btn btn-sm btn-outline-secondary" onclick="tambahBarisJasa()"><i class="bi bi-plus-circle"></i> Tambah Penerima</button>
-                             </td>
-                           </tr>
-                           <tr class="table-warning fw-bold">
-                             <td colspan="2" class="text-end">Total Nilai Bersih yang Dipecah:</td>
-                             <td colspan="3" id="total-pecahan-jasa">Rp 0</td>
-                           </tr>
-                         </tfoot>
-                       </table>
-                       <button class="btn btn-success w-100" onclick="cetakDokumen('jasa')"><i class="bi bi-printer"></i> Cetak Kwitansi & Daftar Penerima (PDF)</button>
+                  <!--Pengaturan Kwitansi & Jenis Dokumen -->
+                  <div class="row g-3 mb-3 p-3 border rounded border-warning bg-warning bg-opacity-10">
+                    <div class="col-md-4">
+                      <label class="form-label fw-bold">Jenis Output LPJ</label>
+                      <select id="jenis-spj" class="form-select border-warning fw-semibold" onchange="ubahTampilanRincian()">
+                        <option value="jasa">BELANJA JASA (Kwitansi + Daftar Penerima)</option>
+                        <option value="barang">BELANJA BARANG (Kwitansi + Nota Toko)</option>
+                      </select>
                     </div>
-
-                    <!-- Panel Barang -->
-                    <div id="panel-barang" class="d-none">
-                       <div class="row mb-3">
-                         <div class="col-md-6">
-                           <label class="form-label">Pilih Toko/Vendor:</label>
-                           <select class="form-select" id="pilih-toko"></select>
-                         </div>
-                         <div class="col-md-3">
-                           <label class="form-label">No. Nota Toko:</label>
-                           <input type="text" class="form-control" id="no-nota-toko" placeholder="Misal: INV-001">
-                         </div>
-                         <div class="col-md-3">
-                           <label class="form-label">Tgl Nota Toko:</label>
-                           <input type="date" class="form-control" id="tgl-nota-toko">
-                         </div>
-                       </div>
-                       <table class="table table-bordered table-sm">
-                         <thead class="table-light">
-                           <tr>
-                             <th>Nama Barang</th>
-                             <th>Banyaknya</th>
-                             <th>Harga Satuan (Rp)</th>
-                             <th>Aksi</th>
-                           </tr>
-                         </thead>
-                         <tbody id="tbody-rincian-barang">
-                           <!-- Baris dinamis ditambahkan via JS -->
-                         </tbody>
-                         <tfoot>
-                           <tr>
-                             <td colspan="4">
-                               <button class="btn btn-sm btn-outline-secondary" onclick="tambahBarisBarang()"><i class="bi bi-plus-circle"></i> Tambah Barang</button>
-                             </td>
-                           </tr>
-                           <tr class="table-warning fw-bold">
-                             <td colspan="2" class="text-end">Total Nilai Belanja:</td>
-                             <td colspan="2" id="total-pecahan-barang">Rp 0</td>
-                           </tr>
-                         </tfoot>
-                       </table>
-                       <button class="btn btn-success w-100" onclick="cetakDokumen('barang')"><i class="bi bi-printer"></i> Cetak Kwitansi & Nota (PDF)</button>
+                    <div class="col-md-4">
+                      <label class="form-label fw-bold">Kategori Jasa / Barang</label>
+                      <select id="sub-jenis-spj" class="form-select" onchange="sinkronJudulDaftar()">
+                        <option value="TRANSPORT">Biaya Perjalanan Dinas / Transport</option>
+                        <option value="HONOR">Honorarium Narasumber / Kegiatan</option>
+                        <option value="UPAH">Upah Jasa / Tenaga Kerja</option>
+                        <option value="BARANG">Belanja Barang / ATK / Konsumsi</option>
+                      </select>
                     </div>
-                    <div id="print-area" class="d-none"></div>
-
+                    <div class="col-md-4">
+                      <label class="form-label fw-bold">Nama Penerima di Kwitansi Atas</label>
+                      <input type="text" id="kwitansi-penerima" class="form-control" placeholder="Otomatis dari Penerima 1 / Nama Toko" oninput="renderPreviewDokumen()">
+                    </div>
+                    <div class="col-md-8">
+                      <label class="form-label fw-bold">Uraian Pembayaran pada Kwitansi</label>
+                      <input type="text" id="kwitansi-uraian" class="form-control" oninput="renderPreviewDokumen()">
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label fw-bold">Mode Tata Letak Kertas A4</label>
+                      <select id="mode-halaman" class="form-select" onchange="renderPreviewDokumen()">
+                        <option value="gabung">1 Lembar A4 (Kwitansi Atas + Rincian Bawah)</option>
+                        <option value="pisah">2 Halaman Terpisah (Kwitansi Hal. 1, Rincian Hal. 2)</option>
+                      </select>
+                    </div>
                   </div>
+
+                  <!-- PANEL A: PENYESUAIAN BELANJA JASA (HONOR / TRANSPORT / UPAH) -->
+                  <div id="panel-jasa" class="mb-4">
+                    <div class="row g-2 mb-2">
+                      <div class="col-md-8">
+                        <label class="form-label fw-bold small mb-1">Judul Daftar Penerima (Baris 1):</label>
+                        <input type="text" class="form-control form-control-sm fw-bold" id="judul-daftar-jasa" oninput="renderPreviewDokumen()">
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label fw-bold small mb-1">Sumber Dana (Baris 3):</label>
+                        <input type="text" class="form-control form-control-sm" id="sumber-dana-jasa" value="DARI DANA BOS REGULER" oninput="renderPreviewDokumen()">
+                      </div>
+                    </div>
+
+                    <div class="table-responsive">
+                      <table class="table table-bordered table-sm align-middle">
+                        <thead class="table-light text-center">
+                          <tr>
+                            <th style="width:24%">Pilih dari Master / Ketik Nama</th>
+                            <th style="width:16%">Jabatan</th>
+                            <th style="width:10%">Status Kepeg</th>
+                            <th style="width:8%">Vol</th>
+                            <th style="width:13%">Harga Satuan</th>
+                            <th style="width:11%">Jumlah</th>
+                            <th style="width:10%">PPh.21</th>
+                            <th style="width:5%">Aksi</th>
+                          </tr>
+                        </thead>
+                        <tbody id="tbody-rincian-jasa"></tbody>
+                        <tfoot>
+                          <tr>
+                            <td colspan="8">
+                              <button class="btn btn-sm btn-outline-primary me-2" onclick="tambahBarisJasa()"><i class="bi bi-plus-circle"></i> Tambah Baris Penerima</button>
+                              <button class="btn btn-sm btn-outline-secondary" onclick="bagiRataNominalJasa()"><i class="bi bi-calculator"></i> Bagi Rata Nominal BPU ke Semua Baris</button>
+                            </td>
+                          </tr>
+                          <tr class="table-warning fw-bold">
+                            <td colspan="5" class="text-end">Total Rincian vs Total BKU:</td>
+                            <td colspan="3" id="status-balance-jasa">Rp 0</td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  </div>
+
+                  <!-- PANEL B: PENYESUAIAN BELANJA BARANG (NOTA TOKO) -->
+                  <div id="panel-barang" class="d-none mb-4">
+                    <div class="row g-2 mb-3 bg-light p-2 rounded border">
+                      <div class="col-md-4">
+                        <label class="form-label fw-bold small mb-1">Pilih Toko / Vendor (Master Toko):</label>
+                        <select class="form-select form-select-sm" id="pilih-toko" onchange="pilihTokoBerubah()"></select>
+                      </div>
+                      <div class="col-md-3">
+                        <label class="form-label fw-bold small mb-1">Nama Kasir / Tanda Tangan Toko:</label>
+                        <input type="text" class="form-control form-control-sm" id="nama-kasir-toko" oninput="renderPreviewDokumen()">
+                      </div>
+                      <div class="col-md-3">
+                        <label class="form-label fw-bold small mb-1">Alamat Toko:</label>
+                        <input type="text" class="form-control form-control-sm" id="alamat-toko-input" oninput="renderPreviewDokumen()">
+                      </div>
+                      <div class="col-md-2">
+                        <label class="form-label fw-bold small mb-1">No. Nota Toko:</label>
+                        <input type="text" class="form-control form-control-sm" id="no-nota-toko" placeholder="NOTA-01" oninput="renderPreviewDokumen()">
+                      </div>
+                    </div>
+
+                    <div class="table-responsive">
+                      <table class="table table-bordered table-sm align-middle">
+                        <thead class="table-light text-center">
+                          <tr>
+                            <th style="width:38%">Nama Barang / Uraian Nota</th>
+                            <th style="width:12%">Volume</th>
+                            <th style="width:14%">Satuan</th>
+                            <th style="width:16%">Harga Satuan (Rp)</th>
+                            <th style="width:14%">Jumlah (Rp)</th>
+                            <th style="width:6%">Aksi</th>
+                          </tr>
+                        </thead>
+                        <tbody id="tbody-rincian-barang"></tbody>
+                        <tfoot>
+                          <tr>
+                            <td colspan="6">
+                              <button class="btn btn-sm btn-outline-primary" onclick="tambahBarisBarang()"><i class="bi bi-plus-circle"></i> Tambah Item Barang</button>
+                            </td>
+                          </tr>
+                          <tr class="table-warning fw-bold">
+                            <td colspan="4" class="text-end">Total Nota vs Total BKU:</td>
+                            <td colspan="2" id="status-balance-barang">Rp 0</td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  </div>
+
+                  <!-- Tombol Cetak & Unduh PDF -->
+                  <div class="d-flex flex-wrap gap-2 mb-3">
+                    <button class="btn btn-primary btn-lg flex-grow-1" onclick="window.print()">
+                      <i class="bi bi-printer-fill me-1"></i> Cetak / Simpan PDF Presisi (Rekomendasi)
+                    </button>
+                    <button class="btn btn-success btn-lg" onclick="unduhFilePDF()">
+                      <i class="bi bi-file-earmark-pdf-fill me-1"></i> Download File PDF Langsung
+                    </button>
+                  </div>
+
+                  <!-- LIVE PREVIEW KERTAS A4 -->
+                  <h6 class="fw-bold text-secondary mb-2"><i class="bi bi-eye me-1"></i> Pratinjau Dokumen Siap Cetak (Ukuran A4):</h6>
+                  <div id="preview-cetak-wrapper">
+                    <div id="print-area-a4" class="kertas-a4"></div>
+                  </div>
+
                 </div>
-
               </div>
             </div>
           </div>
 
-          <!-- Konten Master Pegawai -->
+          <!-- 4. KONTEN MASTER PEGAWAI (FULL CRUD) -->
           <div class="tab-pane fade" id="content-pegawai" role="tabpanel">
-             <div class="card shadow-sm">
-              <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 text-primary"><i class="bi bi-people"></i> Master Pegawai</h5>
-                <button class="btn btn-sm btn-success" onclick="tambahDataMaster('Master_Pegawai')"><i class="bi bi-plus"></i> Tambah Pegawai Baru</button>
+            <div class="card shadow-sm">
+              <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
+                <h5 class="mb-0 text-primary fw-bold"><i class="bi bi-people me-1"></i> Master Pegawai / Penerima Honor & Transport</h5>
+                <div>
+                  <button class="btn btn-sm btn-success" onclick="bukaModalTambah('Master_Pegawai')"><i class="bi bi-plus-lg"></i> Tambah Pegawai Baru</button>
+                  <button class="btn btn-sm btn-outline-primary ms-1" onclick="loadTableData('Master_Pegawai')"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+                </div>
               </div>
-              <div class="card-body">
+              <div class="card-body p-0">
                 <div class="table-responsive">
-                  <table class="table table-bordered table-hover table-sm table-striped">
-                    <thead class="table-light" id="thead-pegawai"></thead>
+                  <table class="table table-bordered table-hover table-sm table-striped mb-0">
+                    <thead class="sticky-thead" id="thead-pegawai"></thead>
                     <tbody id="tbody-pegawai">
-                      <tr><td colspan="100%" class="text-center text-muted">Memuat data...</td></tr>
+                      <tr><td colspan="100%" class="text-center py-4 text-muted">Memuat data...</td></tr>
                     </tbody>
                   </table>
                 </div>
@@ -273,22 +488,63 @@
             </div>
           </div>
 
-          <!-- Konten Master Toko -->
+          <!-- 5. KONTEN MASTER TOKO (FULL CRUD) -->
           <div class="tab-pane fade" id="content-toko" role="tabpanel">
-             <div class="card shadow-sm">
-              <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 text-primary"><i class="bi bi-shop"></i> Master Toko</h5>
-                <button class="btn btn-sm btn-success" onclick="tambahDataMaster('Master_Toko')"><i class="bi bi-plus"></i> Tambah Toko Baru</button>
+            <div class="card shadow-sm">
+              <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
+                <h5 class="mb-0 text-primary fw-bold"><i class="bi bi-shop me-1"></i> Master Toko / Vendor Belanja Barang</h5>
+                <div>
+                  <button class="btn btn-sm btn-success" onclick="bukaModalTambah('Master_Toko')"><i class="bi bi-plus-lg"></i> Tambah Toko Baru</button>
+                  <button class="btn btn-sm btn-outline-primary ms-1" onclick="loadTableData('Master_Toko')"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+                </div>
               </div>
-              <div class="card-body">
+              <div class="card-body p-0">
                 <div class="table-responsive">
-                  <table class="table table-bordered table-hover table-sm table-striped">
-                    <thead class="table-light" id="thead-toko"></thead>
+                  <table class="table table-bordered table-hover table-sm table-striped mb-0">
+                    <thead class="sticky-thead" id="thead-toko"></thead>
                     <tbody id="tbody-toko">
-                      <tr><td colspan="100%" class="text-center text-muted">Memuat data...</td></tr>
+                      <tr><td colspan="100%" class="text-center py-4 text-muted">Memuat data...</td></tr>
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. KONTEN PENGATURAN PEJABAT SEKOLAH -->
+          <div class="tab-pane fade" id="content-pejabat" role="tabpanel">
+            <div class="card shadow-sm">
+              <div class="card-header bg-white">
+                <h5 class="mb-0 text-primary fw-bold"><i class="bi bi-person-badge me-1"></i> Pengaturan Pejabat Penandatangan LPJ</h5>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold">Nama Kepala Sekolah</label>
+                    <input type="text" class="form-control" id="set-nama-kepsek" value="IIS GUSTINI RATNA NENGSIH, S.Pd.SD">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold">NIP Kepala Sekolah</label>
+                    <input type="text" class="form-control" id="set-nip-kepsek" value="1971081720140820002">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold">Nama Bendahara BOSP</label>
+                    <input type="text" class="form-control" id="set-nama-bendahara" value="NURJANAH, S.Pd.I.">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold">NIP Bendahara BOSP</label>
+                    <input type="text" class="form-control" id="set-nip-bendahara" value="198312252023212016">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold">Nama Sekolah</label>
+                    <input type="text" class="form-control" id="set-nama-sekolah" value="SDN 1 SUKAHAJI">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold">Nama Tempat / Desa (Titimangsa)</label>
+                    <input type="text" class="form-control" id="set-tempat" value="Sukahaji">
+                  </div>
+                </div>
+                <button class="btn btn-primary mt-3" onclick="simpanPejabatLokal()"><i class="bi bi-save"></i> Simpan Pengaturan Pejabat</button>
               </div>
             </div>
           </div>
@@ -298,43 +554,206 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Library untuk Print/Save to PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  
-  <script>
-    // URL API Apps Script Anda
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyUwXqHsbop8zV185lnOMGLWa85cBAfd97wy_GTrwe9hW2lV5BzhppGyy8JcfOF6W2D2w/exec';
-    let currentBpuData = {};
-    let masterPegawaiData = [];
-    let masterTokoData = [];
+  <!-- MODAL FULL CRUD (TAMBAH & EDIT UNTUK SEMUA TABEL) -->
+  <div class="modal fade d-print-none" id="crudModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="crudModalLabel">Form Data</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3" id="crudModalBody"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-primary" id="btn-save-crud" onclick="simpanDataCRUD()">
+            <i class="bi bi-check-lg"></i> Simpan ke Database
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    // FUNGSI UNDUH TEMPLATE
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <script>
+    // URL API Apps Script
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyUwXqHsbop8zV185lnOMGLWa85cBAfd97wy_GTrwe9hW2lV5BzhppGyy8JcfOF6W2D2w/exec';
+
+    // Penyimpanan memori sementara (Cache) untuk semua tabel
+    const sheetCache = {
+      DB_BKU: { headers: [], data: [] },
+      DB_ARKAS: { headers: [], data: [] },
+      Master_Pegawai: { headers: [], data: [] },
+      Master_Toko: { headers: [], data: [] }
+    };
+
+    let currentBpuData = null;
+    let crudState = { mode: 'create', sheetName: '', rowIndex: -1, headers: [] };
+    let crudModalInstance = null;
+
+    // =====================================================
+    // 1. HELPER FORMAT TANGGAL, RUPIAH, & TERBILANG OTOMATIS
+    // =====================================================
+    function konversiSerialTanggal(val) {
+      if (val === null || val === undefined) return "";
+      let str = val.toString().trim();
+      // Jika berupa angka 5 digit serial Excel seperti 46266
+      if (/^\d{5}$/.test(str)) {
+        let serial = parseInt(str, 10);
+        if (serial > 35000 && serial < 65000) {
+          let dateObj = new Date(Math.round((serial - 25569) * 86400 * 1000));
+          let d = String(dateObj.getUTCDate()).padStart(2, '0');
+          let m = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+          let y = dateObj.getUTCFullYear();
+          return `${d}-${m}-${y}`;
+        }
+      }
+      return str;
+    }
+
+    function formatTanggalPanjang(val) {
+      let clean = konversiSerialTanggal(val);
+      const bulanIndo = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+      // Format dd-MM-yyyy atau dd/MM/yyyy
+      let parts = clean.split(/[-/]/);
+      if (parts.length === 3) {
+        let d = parseInt(parts[0], 10);
+        let m = parseInt(parts[1], 10);
+        let y = parts[2];
+        if (parts[0].length === 4) { // yyyy-MM-dd
+          y = parts[0];
+          m = parseInt(parts[1], 10);
+          d = parseInt(parts[2], 10);
+        }
+        if (m >= 1 && m <= 12) {
+          return `${d} ${bulanIndo[m - 1]} ${y}`;
+        }
+      }
+      return clean;
+    }
+
+    function parseAngka(val) {
+      if (typeof val === 'number') return val;
+      if (!val) return 0;
+      let s = val.toString().trim();
+      // Hilangkan Rp dan spasi
+      s = s.replace(/[^0-9.,-]/g, '');
+      // Jika menggunakan titik sebagai ribuan (misal 1.588.000 atau 25.000)
+      if (s.includes('.') && !s.includes(',')) {
+        s = s.replace(/\./g, '');
+      } else if (s.includes('.') && s.includes(',')) {
+        s = s.replace(/\./g, '').replace(',', '.');
+      } else if (s.includes(',')) {
+        let parts = s.split(',');
+        if (parts[parts.length - 1].length === 3) s = s.replace(/,/g, '');
+        else s = s.replace(',', '.');
+      }
+      return parseFloat(s) || 0;
+    }
+
+    function formatRupiah(num) {
+      return (Math.round(num) || 0).toLocaleString('id-ID');
+    }
+
+    function angkaKeTerbilang(nilai) {
+      nilai = Math.abs(Math.round(nilai));
+      const huruf = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+      function sebut(n) {
+        if (n < 12) return huruf[n];
+        if (n < 20) return sebut(n - 10) + " Belas";
+        if (n < 100) return sebut(Math.floor(n / 10)) + " Puluh " + sebut(n % 10);
+        if (n < 200) return "Seratus " + sebut(n - 100);
+        if (n < 1000) return sebut(Math.floor(n / 100)) + " Ratus " + sebut(n % 100);
+        if (n < 2000) return "Seribu " + sebut(n - 1000);
+        if (n < 1000000) return sebut(Math.floor(n / 1000)) + " Ribu " + sebut(n % 1000);
+        if (n < 1000000000) return sebut(Math.floor(n / 1000000)) + " Juta " + sebut(n % 1000000);
+        return sebut(Math.floor(n / 1000000000)) + " Miliar " + sebut(n % 1000000000);
+      }
+      if (nilai === 0) return "Nol Rupiah";
+      return (sebut(nilai).replace(/\s+/g, ' ').trim()) + " Rupiah";
+    }
+
+    // =====================================================
+    // 2. INISIALISASI AWAL & PENGATURAN PEJABAT
+    // =====================================================
+    window.addEventListener('DOMContentLoaded', async () => {
+      crudModalInstance = new bootstrap.Modal(document.getElementById('crudModal'));
+      muatPejabatLokal();
+      await Promise.all([
+        loadTableData('DB_BKU', true),
+        loadTableData('DB_ARKAS', true),
+        loadTableData('Master_Pegawai', true),
+        loadTableData('Master_Toko', true)
+      ]);
+      updateRingkasanDashboard();
+    });
+
+    function updateRingkasanDashboard() {
+      document.getElementById('stat-bku').innerText = `${sheetCache.DB_BKU.data.length} Baris`;
+      document.getElementById('stat-arkas').innerText = `${sheetCache.DB_ARKAS.data.length} Baris`;
+      document.getElementById('stat-master').innerText = `${sheetCache.Master_Pegawai.data.length} Pegawai & ${sheetCache.Master_Toko.data.length} Toko`;
+    }
+
+    function simpanPejabatLokal() {
+      const data = {
+        kepsek: document.getElementById('set-nama-kepsek').value,
+        nipKepsek: document.getElementById('set-nip-kepsek').value,
+        bendahara: document.getElementById('set-nama-bendahara').value,
+        nipBendahara: document.getElementById('set-nip-bendahara').value,
+        sekolah: document.getElementById('set-nama-sekolah').value,
+        tempat: document.getElementById('set-tempat').value
+      };
+      localStorage.setItem('pejabat_bos_sukahaji', JSON.stringify(data));
+      alert("Pengaturan Pejabat Penandatangan berhasil disimpan!");
+    }
+
+    function muatPejabatLokal() {
+      const saved = localStorage.getItem('pejabat_bos_sukahaji');
+      if (saved) {
+        try {
+          const d = JSON.parse(saved);
+          if (d.kepsek) document.getElementById('set-nama-kepsek').value = d.kepsek;
+          if (d.nipKepsek) document.getElementById('set-nip-kepsek').value = d.nipKepsek;
+          if (d.bendahara) document.getElementById('set-nama-bendahara').value = d.bendahara;
+          if (d.nipBendahara) document.getElementById('set-nip-bendahara').value = d.nipBendahara;
+          if (d.sekolah) document.getElementById('set-nama-sekolah').value = d.sekolah;
+          if (d.tempat) document.getElementById('set-tempat').value = d.tempat;
+        } catch (e) {}
+      }
+    }
+
+    // =====================================================
+    // 3. UNDUH TEMPLATE & UPLOAD CSV
+    // =====================================================
     function downloadTemplate(type) {
       let headers = ""; let filename = "";
-      if(type === 'bku') {
+      if (type === 'bku') {
         headers = "TANGGAL;KODE KEGIATAN;KODE REKENING;NO. BUKTI;URAIAN;PENERIMAAN;PENGELUARAN;SALDO\n";
         filename = "Template_Upload_BKU.csv";
-      } else if(type === 'arkas') {
+      } else {
         headers = "No_Urut;Kode_Rekening;Kode_Program_1;Kode_Program_2;Kode_Program_3;Uraian;Volume;Satuan;Tarif_Harga;Jumlah_Total;Tahap_1;Tahap_2\n";
         filename = "Template_Upload_ARKAS.csv";
       }
       const blob = new Blob([headers], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob); link.download = filename;
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
       link.click();
     }
 
-    // FUNGSI UPLOAD DATA
     async function uploadData(sheetName) {
       const inputId = sheetName === 'DB_BKU' ? 'file-bku' : 'file-arkas';
       const fileInput = document.getElementById(inputId);
       const file = fileInput.files[0];
-      if (!file) { alert("Pilih file CSV dulu."); return; }
+      if (!file) { alert("Pilih file CSV terlebih dahulu."); return; }
 
       const btn = fileInput.nextElementSibling;
       const originalBtnText = btn.innerHTML;
-      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Uploading...'; btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Mengunggah...';
+      btn.disabled = true;
 
       const reader = new FileReader();
       reader.onload = async function(e) {
@@ -346,219 +765,852 @@
           const result = await res.json();
           alert(result.status === "success" ? "BERHASIL: " + result.message : "GAGAL: " + result.message);
           fileInput.value = "";
-          loadTableData(sheetName);
-        } catch (error) { alert("Error saat upload."); console.error(error); } 
-        finally { btn.innerHTML = originalBtnText; btn.disabled = false; }
+          document.getElementById('select-table-bku-arkas').value = sheetName;
+          await loadTableData(sheetName);
+          updateRingkasanDashboard();
+        } catch (error) {
+          alert("Terjadi kesalahan koneksi saat upload.");
+          console.error(error);
+        } finally {
+          btn.innerHTML = originalBtnText;
+          btn.disabled = false;
+        }
       };
       reader.readAsText(file);
     }
 
-    // FUNGSI TAMPILKAN TABEL DATABASE
-    async function loadTableData(sheetName) {
-      let tbodyId = 'tbody-bku-arkas'; let theadId = 'thead-bku-arkas';
-      if(sheetName === 'Master_Pegawai') { tbodyId = 'tbody-pegawai'; theadId = 'thead-pegawai'; }
-      else if(sheetName === 'Master_Toko') { tbodyId = 'tbody-toko'; theadId = 'thead-toko'; }
-      
-      document.getElementById(tbodyId).innerHTML = '<tr><td colspan="100%" class="text-center">Memuat...</td></tr>';
+    // =====================================================
+    // 4. LOAD TABEL & FULL CRUD (CREATE, READ, UPDATE, DELETE)
+    // =====================================================
+    function getDefaultHeaderList(sheetName) {
+      if (sheetName === 'DB_BKU') return ["TANGGAL", "KODE KEGIATAN", "KODE REKENING", "NO. BUKTI", "URAIAN", "PENERIMAAN", "PENGELUARAN", "SALDO"];
+      if (sheetName === 'DB_ARKAS') return ["No_Urut", "Kode_Rekening", "Kode_Program_1", "Kode_Program_2", "Kode_Program_3", "Uraian", "Volume", "Satuan", "Tarif_Harga", "Jumlah_Total", "Tahap_1", "Tahap_2"];
+      if (sheetName === 'Master_Pegawai') return ["Nama_Pegawai", "NIP_NIK", "Jabatan", "Status_Kepegawaian", "Golongan", "NPWP"];
+      if (sheetName === 'Master_Toko') return ["Nama_Toko", "Nama_Pelayan_Kasir", "Alamat_Toko", "NPWP_Toko", "No_Telepon"];
+      return [];
+    }
+
+    async function loadTableData(sheetName, silent = false) {
+      let tbodyId = 'tbody-bku-arkas';
+      let theadId = 'thead-bku-arkas';
+      if (sheetName === 'Master_Pegawai') { tbodyId = 'tbody-pegawai'; theadId = 'thead-pegawai'; }
+      else if (sheetName === 'Master_Toko') { tbodyId = 'tbody-toko'; theadId = 'thead-toko'; }
+
+      const activeSelect = document.getElementById('select-table-bku-arkas').value;
+      const shouldRenderBkuArkas = (sheetName === 'DB_BKU' || sheetName === 'DB_ARKAS') && (!silent || activeSelect === sheetName);
+
+      if (!silent || shouldRenderBkuArkas) {
+        document.getElementById(tbodyId).innerHTML = '<tr><td colspan="100%" class="text-center py-4"><span class="spinner-border spinner-border-sm text-primary"></span> Memuat data dari Google Sheets...</td></tr>';
+      }
+
       try {
-        const res = await fetch(`${SCRIPT_URL}?action=read&sheetName=${sheetName}`);
-        const data = await res.json();
-        if(data.status === "success") {
-          
-          if(sheetName === 'Master_Pegawai') masterPegawaiData = data.data;
-          if(sheetName === 'Master_Toko') {
-            masterTokoData = data.data;
-            let optToko = '<option value="">-- Pilih Toko --</option>';
-            data.data.forEach(t => { optToko += `<option value="${t[0]}">${t[0]}</option>`; });
-            document.getElementById('pilih-toko').innerHTML = optToko;
+        let res = await fetch(`${SCRIPT_URL}?action=read&sheetName=${sheetName}`);
+        let data = await res.json();
+
+        // Fallback otomatis jika sheet bernama DB_RKAS atau DB_ARKAS
+        if (data.status !== "success" && sheetName === "DB_ARKAS") {
+          res = await fetch(`${SCRIPT_URL}?action=read&sheetName=DB_RKAS`);
+          data = await res.json();
+        }
+
+        if (data.status === "success") {
+          const headers = (data.headers && data.headers.length > 0) ? data.headers : getDefaultHeaderList(sheetName);
+          const rows = (data.data || []).map(r => {
+            let copy = [...r];
+            if (sheetName === 'DB_BKU' && copy.length > 0) {
+              copy[0] = konversiSerialTanggal(copy[0]);
+            }
+            return copy;
+          });
+
+          sheetCache[sheetName] = { headers: headers, data: rows };
+
+          if (sheetName === 'Master_Toko') {
+            perbaruiDropdownToko();
           }
 
-          let headHtml = '<tr>';
-          data.headers.forEach(h => headHtml += `<th>${h}</th>`);
-          headHtml += '<th>Aksi</th></tr>';
-          document.getElementById(theadId).innerHTML = headHtml;
-
-          let bodyHtml = '';
-          data.data.forEach((row, index) => {
-            bodyHtml += '<tr>';
-            row.forEach(col => bodyHtml += `<td>${col}</td>`);
-            bodyHtml += `<td class="text-nowrap">
-              <button class="btn btn-sm btn-outline-danger" onclick="alert('Fitur Hapus belum dihubungkan ke Apps Script')"><i class="bi bi-trash"></i></button>
-            </td></tr>`;
-          });
-          if(data.data.length===0) bodyHtml = '<tr><td colspan="100%" class="text-center">Belum ada data</td></tr>';
-          document.getElementById(tbodyId).innerHTML = bodyHtml;
+          if (!silent || shouldRenderBkuArkas || sheetName === 'Master_Pegawai' || sheetName === 'Master_Toko') {
+            renderTabelHTML(sheetName, theadId, tbodyId);
+          }
+        } else {
+          document.getElementById(tbodyId).innerHTML = `<tr><td colspan="100%" class="text-center text-danger py-3">Gagal memuat ${sheetName}: ${data.message}</td></tr>`;
         }
-      } catch(e) { console.error(e); }
+      } catch (e) {
+        console.error(e);
+        document.getElementById(tbodyId).innerHTML = `<tr><td colspan="100%" class="text-center text-danger py-3">Gagal menghubungi server Google Apps Script.</td></tr>`;
+      }
     }
-    
-    // FUNGSI PENYESUAIAN CETAK SPJ
+
+    function renderTabelHTML(sheetName, theadId, tbodyId, filterKeyword = '') {
+      const cache = sheetCache[sheetName];
+      if (!cache) return;
+
+      let headHtml = '<tr><th class="text-center" style="width:45px">#</th>';
+      cache.headers.forEach(h => headHtml += `<th>${h}</th>`);
+      headHtml += '<th class="text-center" style="width:95px">Aksi CRUD</th></tr>';
+      document.getElementById(theadId).innerHTML = headHtml;
+
+      let bodyHtml = '';
+      const kw = filterKeyword.toLowerCase().trim();
+      let tampilCount = 0;
+
+      cache.data.forEach((row, originalIndex) => {
+        if (kw && !row.join(' ').toLowerCase().includes(kw)) return;
+        tampilCount++;
+        bodyHtml += `<tr><td class="text-center text-muted">${originalIndex + 1}</td>`;
+        for (let c = 0; c < cache.headers.length; c++) {
+          let cellVal = row[c] !== undefined ? row[c] : '';
+          if (sheetName === 'DB_BKU' && c === 0) cellVal = konversiSerialTanggal(cellVal);
+          bodyHtml += `<td>${cellVal}</td>`;
+        }
+        bodyHtml += `<td class="text-center text-nowrap">
+          <button class="btn btn-sm btn-outline-primary py-0 px-2 me-1" title="Edit Baris" onclick="bukaModalEdit('${sheetName}', ${originalIndex})">
+            <i class="bi bi-pencil-square"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-danger py-0 px-2" title="Hapus Baris" onclick="hapusDataCRUD('${sheetName}', ${originalIndex})">
+            <i class="bi bi-trash"></i>
+          </button>
+        </td></tr>`;
+      });
+
+      if (tampilCount === 0) {
+        bodyHtml = `<tr><td colspan="100%" class="text-center py-4 text-muted">Belum ada data (atau tidak ditemukan). Klik tombol <b>+ Tambah</b> untuk mengisi data.</td></tr>`;
+      }
+      document.getElementById(tbodyId).innerHTML = bodyHtml;
+    }
+
+    function filterTableRows(target, keyword) {
+      if (target === 'bku-arkas') {
+        const sheetName = document.getElementById('select-table-bku-arkas').value;
+        renderTabelHTML(sheetName, 'thead-bku-arkas', 'tbody-bku-arkas', keyword);
+      }
+    }
+
+    // BUKA MODAL TAMBAH (CREATE)
+    async function bukaModalTambah(sheetName) {
+      if (!sheetCache[sheetName] || sheetCache[sheetName].headers.length === 0) {
+        await loadTableData(sheetName);
+      }
+      const headers = sheetCache[sheetName].headers.length > 0 ? sheetCache[sheetName].headers : getDefaultHeaderList(sheetName);
+      crudState = { mode: 'create', sheetName: sheetName, rowIndex: -1, headers: headers };
+
+      document.getElementById('crudModalLabel').innerText = `Tambah Data Baru — ${sheetName}`;
+      let formHtml = '';
+      headers.forEach((h, i) => {
+        let placeholder = '';
+        if (sheetName === 'DB_BKU' && i === 0) placeholder = 'Contoh: 01-09-2026';
+        if (sheetName === 'Master_Pegawai' && i === 3) placeholder = 'Contoh: ASN / PPPK / Honorer';
+        formHtml += `
+          <div class="col-md-6">
+            <label class="form-label fw-bold small mb-1">${h}</label>
+            <input type="text" class="form-control form-control-sm" id="crud-field-${i}" placeholder="${placeholder}">
+          </div>`;
+      });
+      document.getElementById('crudModalBody').innerHTML = formHtml;
+      crudModalInstance.show();
+    }
+
+    // BUKA MODAL EDIT (UPDATE)
+    function bukaModalEdit(sheetName, rowIndex) {
+      const cache = sheetCache[sheetName];
+      if (!cache || !cache.data[rowIndex]) return;
+
+      const headers = cache.headers;
+      const rowData = cache.data[rowIndex];
+      crudState = { mode: 'update', sheetName: sheetName, rowIndex: rowIndex, headers: headers };
+
+      document.getElementById('crudModalLabel').innerText = `Edit Data ${sheetName} (Baris #${rowIndex + 1})`;
+      let formHtml = '';
+      headers.forEach((h, i) => {
+        let val = rowData[i] !== undefined ? rowData[i] : '';
+        if (sheetName === 'DB_BKU' && i === 0) val = konversiSerialTanggal(val);
+        let safeVal = String(val).replace(/"/g, '&quot;');
+        formHtml += `
+          <div class="col-md-6">
+            <label class="form-label fw-bold small mb-1">${h}</label>
+            <input type="text" class="form-control form-control-sm" id="crud-field-${i}" value="${safeVal}">
+          </div>`;
+      });
+      document.getElementById('crudModalBody').innerHTML = formHtml;
+      crudModalInstance.show();
+    }
+
+    // SIMPAN CREATE / UPDATE KE GOOGLE SHEETS
+    async function simpanDataCRUD() {
+      const btn = document.getElementById('btn-save-crud');
+      const origText = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Menyimpan...';
+      btn.disabled = true;
+
+      const rowData = crudState.headers.map((_, i) => {
+        const el = document.getElementById(`crud-field-${i}`);
+        return el ? el.value.trim() : '';
+      });
+
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: crudState.mode,
+            sheetName: crudState.sheetName,
+            rowIndex: crudState.rowIndex,
+            rowData: rowData
+          })
+        });
+        const result = await res.json();
+        if (result.status === "success") {
+          crudModalInstance.hide();
+          await loadTableData(crudState.sheetName);
+          updateRingkasanDashboard();
+        } else {
+          alert("Gagal menyimpan: " + result.message);
+        }
+      } catch (err) {
+        alert("Kesalahan jaringan saat menyimpan data.");
+        console.error(err);
+      } finally {
+        btn.innerHTML = origText;
+        btn.disabled = false;
+      }
+    }
+
+    // HAPUS BARIS DATA (DELETE)
+    async function hapusDataCRUD(sheetName, rowIndex) {
+      const rowPreview = sheetCache[sheetName]?.data[rowIndex]?.slice(0, 4).join(' | ') || `Baris #${rowIndex + 1}`;
+      if (!confirm(`Yakin ingin menghapus baris ini dari ${sheetName}?\n\n(${rowPreview})`)) return;
+
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'delete',
+            sheetName: sheetName,
+            rowIndex: rowIndex
+          })
+        });
+        const result = await res.json();
+        if (result.status === "success") {
+          await loadTableData(sheetName);
+          updateRingkasanDashboard();
+        } else {
+          alert("Gagal menghapus: " + result.message);
+        }
+      } catch (err) {
+        alert("Kesalahan jaringan saat menghapus baris.");
+        console.error(err);
+      }
+    }
+
+    // =====================================================
+    // 5. MODUL PENYESUAIAN & CETAK LPJ (KWITANSI, DAFTAR HONOR, NOTA)
+    // =====================================================
+    async function initMenuCetak(forceReload = false) {
+      if (forceReload || sheetCache.DB_BKU.data.length === 0) await loadTableData('DB_BKU', true);
+      if (forceReload || sheetCache.DB_ARKAS.data.length === 0) await loadTableData('DB_ARKAS', true);
+      if (forceReload || sheetCache.Master_Pegawai.data.length === 0) await loadTableData('Master_Pegawai', true);
+      if (forceReload || sheetCache.Master_Toko.data.length === 0) await loadTableData('Master_Toko', true);
+
+      // Isi dropdown daftar BPU unik dari DB_BKU
+      const bpuMap = new Map();
+      sheetCache.DB_BKU.data.forEach(r => {
+        const bpu = (r[3] || '').toString().trim();
+        if (bpu && bpu.toUpperCase().startsWith('BPU')) {
+          const nom = parseAngka(r[6]);
+          if (!bpuMap.has(bpu)) {
+            bpuMap.set(bpu, { tgl: konversiSerialTanggal(r[0]), uraian: r[4], total: nom });
+          } else {
+            bpuMap.get(bpu).total += nom;
+          }
+        }
+      });
+
+      let optHtml = '<option value="">-- Pilih NO. BUKTI (${bpuMap.size} BPU tersedia) --</option>'.replace('${bpuMap.size}', bpuMap.size);
+      bpuMap.forEach((val, key) => {
+        optHtml += `<option value="${key}">${key} — Rp ${formatRupiah(val.total)} — ${val.uraian.substring(0, 45)}</option>`;
+      });
+      document.getElementById('dropdown-bpu').innerHTML = optHtml;
+      perbaruiDropdownToko();
+    }
+
+    function perbaruiDropdownToko() {
+      let optToko = '<option value="">-- Pilih Toko dari Master Toko --</option>';
+      sheetCache.Master_Toko.data.forEach((t, idx) => {
+        optToko += `<option value="${idx}">${t[0]} (Kasir: ${t[1] || '-'})</option>`;
+      });
+      const el = document.getElementById('pilih-toko');
+      if (el) el.innerHTML = optToko;
+    }
+
+    function pilihTokoBerubah() {
+      const idx = document.getElementById('pilih-toko').value;
+      if (idx !== "" && sheetCache.Master_Toko.data[idx]) {
+        const t = sheetCache.Master_Toko.data[idx];
+        document.getElementById('nama-kasir-toko').value = t[1] || '';
+        document.getElementById('alamat-toko-input').value = t[2] || '';
+        document.getElementById('kwitansi-penerima').value = t[1] || t[0] || '';
+      }
+      renderPreviewDokumen();
+    }
+
     async function cariBPU() {
       const bpu = document.getElementById('search-bpu').value.trim();
-      if(!bpu) return;
-      document.getElementById('btn-cari').innerHTML = 'Mencari...';
-      try {
-        const res = await fetch(`${SCRIPT_URL}?action=read&sheetName=DB_BKU`);
-        const result = await res.json();
-        if(result.status === "success") {
-          const foundData = result.data.filter(r => r[3].toString().toUpperCase() === bpu.toUpperCase());
-          if(foundData.length > 0) {
-            let totalNominal = 0; let uraian = [];
-            foundData.forEach(r => {
-              totalNominal += parseFloat(r[6].toString().replace(/[^0-9,-]+/g,"")) || 0;
-              uraian.push(r[4]);
-            });
-            currentBpuData = { noBukti: bpu.toUpperCase(), tgl: foundData[0][0], nominal: totalNominal, uraian: uraian.join(" | ") };
-            
-            document.getElementById('info-tanggal').innerText = currentBpuData.tgl;
-            document.getElementById('info-nobukti').innerText = currentBpuData.noBukti;
-            document.getElementById('info-uraian').innerText = currentBpuData.uraian;
-            document.getElementById('info-nominal').innerText = 'Rp ' + totalNominal.toLocaleString('id-ID');
-            
-            document.getElementById('area-hasil-bpu').classList.remove('d-none');
-            document.getElementById('jenis-spj').value = ""; ubahTampilanRincian();
-            
-            if(masterPegawaiData.length===0) loadTableData('Master_Pegawai');
-            if(masterTokoData.length===0) loadTableData('Master_Toko');
-          } else alert('No Bukti tidak ditemukan');
-        }
-      } catch(e) { console.error(e); }
-      finally { document.getElementById('btn-cari').innerHTML = 'Cari Data'; }
+      if (!bpu) { alert("Pilih atau ketik Nomor BPU terlebih dahulu."); return; }
+
+      if (sheetCache.DB_BKU.data.length === 0) await initMenuCetak(true);
+
+      const foundBku = sheetCache.DB_BKU.data.filter(r => (r[3] || '').toString().trim().toUpperCase() === bpu.toUpperCase());
+      if (foundBku.length === 0) {
+        alert(`No. Bukti "${bpu.toUpperCase()}" tidak ditemukan pada DB_BKU.`);
+        return;
+      }
+
+      let totalNominal = 0;
+      let listUraian = [];
+      let listKodeKeg = [];
+      let listKodeRek = [];
+
+      foundBku.forEach(r => {
+        totalNominal += parseAngka(r[6]);
+        if (r[4] && !listUraian.includes(r[4])) listUraian.push(r[4]);
+        if (r[1] && !listKodeKeg.includes(r[1])) listKodeKeg.push(r[1]);
+        if (r[2] && !listKodeRek.includes(r[2])) listKodeRek.push(r[2]);
+      });
+
+      const tglBku = konversiSerialTanggal(foundBku[0][0]);
+      currentBpuData = {
+        noBukti: bpu.toUpperCase(),
+        tgl: tglBku,
+        tglPanjang: formatTanggalPanjang(tglBku),
+        nominal: totalNominal,
+        uraian: listUraian.join(" / "),
+        kodeKegiatan: listKodeKeg[0] || '',
+        kodeRekening: listKodeRek[0] || '',
+        rowsBku: foundBku
+      };
+
+      document.getElementById('info-nobukti').innerText = currentBpuData.noBukti;
+      document.getElementById('info-tanggal').innerText = `${currentBpuData.tgl} (${currentBpuData.tglPanjang})`;
+      document.getElementById('info-kode').innerText = `${listKodeKeg.join(', ')} | ${listKodeRek.join(', ')}`;
+      document.getElementById('info-nominal').innerText = 'Rp ' + formatRupiah(totalNominal);
+      document.getElementById('info-uraian').innerText = currentBpuData.uraian;
+      document.getElementById('kwitansi-uraian').value = currentBpuData.uraian;
+
+      // Cari kecocokan di DB_ARKAS berdasarkan Kode Kegiatan & Kode Rekening
+      const kodeKegClean = currentBpuData.kodeKegiatan.trim();
+      const kodeRekClean = currentBpuData.kodeRekening.trim();
+      const matchedArkas = sheetCache.DB_ARKAS.data.filter(ar => {
+        const rekArkas = (ar[1] || '').toString().trim();
+        const progArkas = (ar[2] || '').toString().trim();
+        return (rekArkas === kodeRekClean && progArkas === kodeKegClean) || (rekArkas === kodeRekClean && !kodeKegClean);
+      });
+
+      document.getElementById('badge-arkas-match').innerText = `${matchedArkas.length} item ARKAS cocok`;
+      if (matchedArkas.length > 0) {
+        let arkasHtml = '<table class="table table-sm table-bordered mb-0"><thead><tr class="table-light"><th>Uraian ARKAS</th><th>Vol</th><th>Satuan</th><th>Harga Satuan</th><th>Jumlah</th><th>Aksi</th></tr></thead><tbody>';
+        matchedArkas.forEach((ar, idx) => {
+          arkasHtml += `<tr>
+            <td>${ar[5]}</td>
+            <td class="text-center">${ar[6]}</td>
+            <td class="text-center">${ar[7]}</td>
+            <td class="text-end">Rp ${formatRupiah(parseAngka(ar[8]))}</td>
+            <td class="text-end">Rp ${formatRupiah(parseAngka(ar[9]))}</td>
+            <td class="text-center"><button class="btn btn-xs btn-primary py-0 px-2" onclick="pakaiItemArkas(${idx})">Gunakan</button></td>
+          </tr>`;
+        });
+        arkasHtml += '</tbody></table>';
+        document.getElementById('box-referensi-arkas').innerHTML = arkasHtml;
+      } else {
+        document.getElementById('box-referensi-arkas').innerHTML = '<span class="text-muted">Tidak ditemukan rincian dengan kode kegiatan & rekening yang persis sama di DB_ARKAS. Anda tetap dapat mengisi rincian di bawah secara langsung.</span>';
+      }
+      currentBpuData.matchedArkas = matchedArkas;
+
+      // Deteksi cerdas apakah ini Belanja Jasa (Perjalanan Dinas / Honor / Jasa) atau Belanja Barang
+      const urLower = currentBpuData.uraian.toLowerCase();
+      const rekStr = currentBpuData.kodeRekening;
+      if (urLower.includes('perjalanan dinas') || urLower.includes('transport')) {
+        document.getElementById('jenis-spj').value = 'jasa';
+        document.getElementById('sub-jenis-spj').value = 'TRANSPORT';
+      } else if (urLower.includes('honor') || urLower.includes('narasumber') || urLower.includes('pembimbing')) {
+        document.getElementById('jenis-spj').value = 'jasa';
+        document.getElementById('sub-jenis-spj').value = 'HONOR';
+      } else if (urLower.includes('upah') || urLower.includes('tenaga kebersihan') || urLower.includes('tukang')) {
+        document.getElementById('jenis-spj').value = 'jasa';
+        document.getElementById('sub-jenis-spj').value = 'UPAH';
+      } else if (rekStr.startsWith('5.1.02.01') || rekStr.startsWith('5.2') || foundBku.length > 1) {
+        document.getElementById('jenis-spj').value = 'barang';
+        document.getElementById('sub-jenis-spj').value = 'BARANG';
+      } else {
+        document.getElementById('jenis-spj').value = 'jasa';
+        document.getElementById('sub-jenis-spj').value = 'TRANSPORT';
+      }
+
+      sinkronJudulDaftar();
+      document.getElementById('area-hasil-bpu').classList.remove('d-none');
+
+      // Isi baris awal otomatis
+      document.getElementById('tbody-rincian-jasa').innerHTML = '';
+      document.getElementById('tbody-rincian-barang').innerHTML = '';
+
+      if (document.getElementById('jenis-spj').value === 'jasa') {
+        tambahBarisJasa(1, currentBpuData.nominal);
+      } else {
+        // Masukkan semua baris dari BPU tersebut ke tabel Nota Barang
+        foundBku.forEach(r => {
+          const nomBaris = parseAngka(r[6]);
+          // Cek apakah di ARKAS ada harga satuan untuk uraian ini
+          const cocokItem = matchedArkas.find(a => (a[5] || '').toLowerCase().trim() === (r[4] || '').toLowerCase().trim());
+          if (cocokItem && parseAngka(cocokItem[8]) > 0) {
+            const hrgSat = parseAngka(cocokItem[8]);
+            const volHitung = Math.max(1, Math.round(nomBaris / hrgSat));
+            tambahBarisBarang(r[4], volHitung, cocokItem[7] || 'buah', hrgSat);
+          } else {
+            tambahBarisBarang(r[4], 1, 'paket', nomBaris);
+          }
+        });
+      }
+
+      ubahTampilanRincian();
+    }
+
+    function pakaiItemArkas(idx) {
+      if (!currentBpuData || !currentBpuData.matchedArkas[idx]) return;
+      const ar = currentBpuData.matchedArkas[idx];
+      const hrg = parseAngka(ar[8]);
+      const vol = Math.max(1, Math.round(currentBpuData.nominal / (hrg || 1)));
+      if (document.getElementById('jenis-spj').value === 'barang') {
+        tambahBarisBarang(ar[5], vol, ar[7] || 'buah', hrg);
+        hitungBarang();
+      } else {
+        tambahBarisJasa(1, hrg);
+        hitungJasa();
+      }
+    }
+
+    function sinkronJudulDaftar() {
+      if (!currentBpuData) return;
+      const sub = document.getElementById('sub-jenis-spj').value;
+      const ur = currentBpuData.uraian.toUpperCase();
+      if (sub === 'TRANSPORT') {
+        document.getElementById('judul-daftar-jasa').value = ur.startsWith('DAFTAR') ? ur : `DAFTAR ${ur}`;
+      } else if (sub === 'HONOR') {
+        document.getElementById('judul-daftar-jasa').value = `DAFTAR PENERIMA HONORARIUM ${ur}`;
+      } else if (sub === 'UPAH') {
+        document.getElementById('judul-daftar-jasa').value = `DAFTAR PENERIMA UPAH / JASA ${ur}`;
+      }
+      renderPreviewDokumen();
     }
 
     function ubahTampilanRincian() {
-      const j = document.getElementById('jenis-spj').value;
-      document.getElementById('area-rincian').classList.toggle('d-none', j==="");
-      document.getElementById('panel-jasa').classList.toggle('d-none', j!=="jasa");
-      document.getElementById('panel-barang').classList.toggle('d-none', j!=="barang");
-      if(j==="jasa" && document.getElementById('tbody-rincian-jasa').children.length===0) tambahBarisJasa();
-      if(j==="barang" && document.getElementById('tbody-rincian-barang').children.length===0) tambahBarisBarang();
+      const jenis = document.getElementById('jenis-spj').value;
+      document.getElementById('panel-jasa').classList.toggle('d-none', jenis !== 'jasa');
+      document.getElementById('panel-barang').classList.toggle('d-none', jenis !== 'barang');
+
+      if (jenis === 'jasa' && document.getElementById('tbody-rincian-jasa').children.length === 0) {
+        tambahBarisJasa(1, currentBpuData ? currentBpuData.nominal : 0);
+      }
+      if (jenis === 'barang' && document.getElementById('tbody-rincian-barang').children.length === 0) {
+        tambahBarisBarang(currentBpuData ? currentBpuData.uraian : '', 1, 'paket', currentBpuData ? currentBpuData.nominal : 0);
+      }
+      hitungJasa();
+      hitungBarang();
+      renderPreviewDokumen();
     }
 
-    function getPegawaiOptions() {
-       let opt = '<option value="">-- Pilih --</option>';
-       masterPegawaiData.forEach(p => { opt += `<option value="${p[0]}|${p[2]}|${p[3]}">${p[0]} (${p[2]})</option>`; });
-       return opt;
+    function getPegawaiDropdownHTML() {
+      let opt = '<option value="">-- Pilih dari Master Pegawai --</option>';
+      sheetCache.Master_Pegawai.data.forEach((p, idx) => {
+        opt += `<option value="${idx}">${p[0]} (${p[2] || '-'})</option>`;
+      });
+      return opt;
     }
 
-    function tambahBarisJasa() {
+    function pilihPegawaiBaris(selectEl) {
+      const tr = selectEl.closest('tr');
+      const idx = selectEl.value;
+      if (idx !== "" && sheetCache.Master_Pegawai.data[idx]) {
+        const p = sheetCache.Master_Pegawai.data[idx];
+        tr.querySelector('.jasa-nama').value = p[0] || '';
+        tr.querySelector('.jasa-jab').value = p[2] || '';
+        tr.querySelector('.jasa-status').value = p[3] || '';
+      }
+      hitungJasa();
+    }
+
+    function tambahBarisJasa(vol = 1, harga = 0) {
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td><select class="form-select form-select-sm jasa-pegawai">${getPegawaiOptions()}</select></td>
-        <td><input type="number" class="form-control form-control-sm jasa-vol" value="1" oninput="hitungJasa()"></td>
-        <td><input type="number" class="form-control form-control-sm jasa-harga" value="0" oninput="hitungJasa()"></td>
-        <td><input type="number" class="form-control form-control-sm jasa-pph" value="0" oninput="hitungJasa()"></td>
-        <td><button class="btn btn-sm btn-danger" onclick="this.parentElement.parentElement.remove(); hitungJasa()"><i class="bi bi-trash"></i></button></td>
+        <td>
+          <select class="form-select form-select-sm mb-1" onchange="pilihPegawaiBaris(this)">${getPegawaiDropdownHTML()}</select>
+          <input type="text" class="form-control form-control-sm jasa-nama" placeholder="Nama lengkap penerima" oninput="hitungJasa()">
+        </td>
+        <td><input type="text" class="form-control form-control-sm jasa-jab" placeholder="Jabatan" oninput="hitungJasa()"></td>
+        <td><input type="text" class="form-control form-control-sm jasa-status" placeholder="ASN/PPPK" oninput="hitungJasa()"></td>
+        <td><input type="number" class="form-control form-control-sm jasa-vol text-center" value="${vol}" oninput="hitungJasa()"></td>
+        <td><input type="number" class="form-control form-control-sm jasa-harga text-end" value="${harga}" oninput="hitungJasa()"></td>
+        <td class="text-end fw-semibold jasa-jumlah-text">Rp ${formatRupiah(vol * harga)}</td>
+        <td><input type="number" class="form-control form-control-sm jasa-pph text-end" value="0" oninput="hitungJasa()"></td>
+        <td class="text-center"><button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="this.closest('tr').remove(); hitungJasa();"><i class="bi bi-trash"></i></button></td>
       `;
       document.getElementById('tbody-rincian-jasa').appendChild(tr);
+      hitungJasa();
+    }
+
+    function bagiRataNominalJasa() {
+      if (!currentBpuData) return;
+      const rows = document.querySelectorAll('#tbody-rincian-jasa tr');
+      if (rows.length === 0) return;
+      const perOrang = Math.floor(currentBpuData.nominal / rows.length);
+      rows.forEach(tr => {
+        tr.querySelector('.jasa-vol').value = 1;
+        tr.querySelector('.jasa-harga').value = perOrang;
+      });
+      hitungJasa();
     }
 
     function hitungJasa() {
-      let t = 0;
-      document.querySelectorAll('#tbody-rincian-jasa tr').forEach(tr => {
-        let v = parseFloat(tr.querySelector('.jasa-vol').value)||0;
-        let h = parseFloat(tr.querySelector('.jasa-harga').value)||0;
-        t += (v*h);
+      let total = 0;
+      let namaPertama = '';
+      document.querySelectorAll('#tbody-rincian-jasa tr').forEach((tr, i) => {
+        const nama = tr.querySelector('.jasa-nama').value.trim();
+        if (i === 0 && nama) namaPertama = nama;
+        const v = parseFloat(tr.querySelector('.jasa-vol').value) || 0;
+        const h = parseFloat(tr.querySelector('.jasa-harga').value) || 0;
+        const jml = v * h;
+        total += jml;
+        tr.querySelector('.jasa-jumlah-text').innerText = 'Rp ' + formatRupiah(jml);
       });
-      document.getElementById('total-pecahan-jasa').innerText = 'Rp ' + t.toLocaleString('id-ID');
+
+      if (namaPertama && !document.getElementById('kwitansi-penerima').dataset.manual) {
+        document.getElementById('kwitansi-penerima').value = namaPertama;
+      }
+
+      const target = currentBpuData ? currentBpuData.nominal : 0;
+      const selisih = target - total;
+      const el = document.getElementById('status-balance-jasa');
+      if (selisih === 0) {
+        el.innerHTML = `<span class="text-success"><i class="bi bi-check-circle-fill"></i> Rp ${formatRupiah(total)} (BALANCE / SESUAI BKU)</span>`;
+      } else {
+        el.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle-fill"></i> Rp ${formatRupiah(total)} (Selisih: Rp ${formatRupiah(Math.abs(selisih))})</span>`;
+      }
+      renderPreviewDokumen();
     }
 
-    function tambahBarisBarang() {
+    function tambahBarisBarang(nama = '', vol = 1, satuan = 'buah', harga = 0) {
       const tr = document.createElement('tr');
+      let safeNama = String(nama).replace(/"/g, '&quot;');
       tr.innerHTML = `
-        <td><input type="text" class="form-control form-control-sm barang-nama" placeholder="Contoh: Kertas HVS"></td>
-        <td><input type="number" class="form-control form-control-sm barang-vol" value="1" oninput="hitungBarang()"></td>
-        <td><input type="number" class="form-control form-control-sm barang-harga" value="0" oninput="hitungBarang()"></td>
-        <td><button class="btn btn-sm btn-danger" onclick="this.parentElement.parentElement.remove(); hitungBarang()"><i class="bi bi-trash"></i></button></td>
+        <td><input type="text" class="form-control form-control-sm barang-nama" value="${safeNama}" oninput="hitungBarang()"></td>
+        <td><input type="number" class="form-control form-control-sm barang-vol text-center" value="${vol}" oninput="hitungBarang()"></td>
+        <td><input type="text" class="form-control form-control-sm barang-satuan text-center" value="${satuan}" oninput="hitungBarang()"></td>
+        <td><input type="number" class="form-control form-control-sm barang-harga text-end" value="${harga}" oninput="hitungBarang()"></td>
+        <td class="text-end fw-semibold barang-jumlah-text">Rp ${formatRupiah(vol * harga)}</td>
+        <td class="text-center"><button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="this.closest('tr').remove(); hitungBarang();"><i class="bi bi-trash"></i></button></td>
       `;
       document.getElementById('tbody-rincian-barang').appendChild(tr);
+      hitungBarang();
     }
 
     function hitungBarang() {
-      let t = 0;
+      let total = 0;
       document.querySelectorAll('#tbody-rincian-barang tr').forEach(tr => {
-        let v = parseFloat(tr.querySelector('.barang-vol').value)||0;
-        let h = parseFloat(tr.querySelector('.barang-harga').value)||0;
-        t += (v*h);
+        const v = parseFloat(tr.querySelector('.barang-vol').value) || 0;
+        const h = parseFloat(tr.querySelector('.barang-harga').value) || 0;
+        const jml = v * h;
+        total += jml;
+        tr.querySelector('.barang-jumlah-text').innerText = 'Rp ' + formatRupiah(jml);
       });
-      document.getElementById('total-pecahan-barang').innerText = 'Rp ' + t.toLocaleString('id-ID');
+
+      const target = currentBpuData ? currentBpuData.nominal : 0;
+      const selisih = target - total;
+      const el = document.getElementById('status-balance-barang');
+      if (selisih === 0) {
+        el.innerHTML = `<span class="text-success"><i class="bi bi-check-circle-fill"></i> Rp ${formatRupiah(total)} (BALANCE / SESUAI BKU)</span>`;
+      } else {
+        el.innerHTML = `<span class="text-danger"><i class="bi bi-exclamation-triangle-fill"></i> Rp ${formatRupiah(total)} (Selisih: Rp ${formatRupiah(Math.abs(selisih))})</span>`;
+      }
+      renderPreviewDokumen();
     }
 
-    // CETAK PDF HTML2PDF (Berisi Format Kwitansi & Rincian)
-    function cetakDokumen(tipe) {
-      const area = document.getElementById('print-area');
-      area.innerHTML = ''; area.classList.remove('d-none');
-      
-      let content = `<div style="padding: 20px; font-family: Arial, sans-serif;">`;
-      
-      // HEADER KWITANSI UMUM
-      content += `
-        <div style="border: 2px solid #000; padding: 15px; margin-bottom: 30px;">
-          <h4 style="text-align:center; text-decoration:underline; margin-bottom: 20px;">KWITANSI BOSP</h4>
-          <table style="width: 100%; font-size: 14px;">
-            <tr><td width="150">No. Bukti</td><td width="10">:</td><td><b>${currentBpuData.noBukti}</b></td></tr>
-            <tr><td>Sudah terima dari</td><td>:</td><td>Bendahara SDN 1 Sukahaji</td></tr>
-            <tr><td>Banyaknya uang</td><td>:</td><td><b>Rp ${currentBpuData.nominal.toLocaleString('id-ID')}</b></td></tr>
-            <tr><td valign="top">Untuk pembayaran</td><td valign="top">:</td><td>${currentBpuData.uraian}</td></tr>
-          </table>
-          <div style="margin-top:40px; display:flex; justify-content:space-between; text-align:center;">
-            <div>Mengetahui,<br>Kepala Sekolah<br><br><br><br><b>IIS GUSTINI RATNA NENGSIH, S.Pd.SD</b><br>NIP. 1971081720140820002</div>
-            <div>Sukahaji, ${currentBpuData.tgl}<br>Bendahara<br><br><br><br><b>NURJANAH, S.Pd.I</b><br>NIP. 198312252023212016</div>
-          </div>
-        </div>`; 
+    // =====================================================
+    // 6. GENERATOR PRATINJAU & CETAK PDF SESUAI CONTOH LPJ
+    // =====================================================
+    function renderPreviewDokumen() {
+      if (!currentBpuData) return;
 
-      if(tipe === 'jasa') {
-         content += `<div class="html2pdf__page-break"></div>`;
-         const judul = document.getElementById('judul-daftar-jasa').value;
-         content += `<h5 style="text-align:center;">${judul}<br>SDN 1 SUKAHAJI</h5>`;
-         content += `<table border="1" style="width:100%; border-collapse:collapse; font-size:12px; text-align:center; margin-top:20px;">
-            <tr style="background:#eee;"><th>NO</th><th>NAMA</th><th>JABATAN</th><th>STATUS</th><th>VOL</th><th>HARGA SATUAN</th><th>JUMLAH KOTOR</th><th>PPH 21</th><th>JUMLAH TERIMA</th><th>TTD</th></tr>`;
-         
-         let rows = document.querySelectorAll('#tbody-rincian-jasa tr');
-         rows.forEach((r, i) => {
-           let pData = r.querySelector('.jasa-pegawai').value.split('|'); 
-           let vol = parseFloat(r.querySelector('.jasa-vol').value)||0;
-           let hrg = parseFloat(r.querySelector('.jasa-harga').value)||0;
-           let pph = parseFloat(r.querySelector('.jasa-pph').value)||0;
-           let kotor = vol*hrg; let terima = kotor-pph;
-           content += `<tr><td>${i+1}</td><td style="text-align:left; padding-left:5px;">${pData[0]||'-'}</td><td>${pData[1]||'-'}</td><td>${pData[2]||'-'}</td><td>${vol}</td><td>${hrg.toLocaleString('id-ID')}</td><td>${kotor.toLocaleString('id-ID')}</td><td>${pph.toLocaleString('id-ID')}</td><td>${terima.toLocaleString('id-ID')}</td><td></td></tr>`;
-         });
-         content += `</table>`;
-      } 
-      else if(tipe === 'barang') {
-         content += `<div class="html2pdf__page-break"></div>`;
-         const toko = document.getElementById('pilih-toko').value;
-         const nota = document.getElementById('no-nota-toko').value;
-         content += `<h4 style="text-align:center;">NOTA PEMBELIAN BARANG</h4><p>Toko: <b>${toko}</b><br>No Nota: ${nota}</p>`;
-         content += `<table border="1" style="width:100%; border-collapse:collapse; font-size:12px; text-align:center; margin-top:20px;">
-            <tr style="background:#eee;"><th>NO</th><th>NAMA BARANG</th><th>BANYAKNYA</th><th>HARGA SATUAN</th><th>JUMLAH</th></tr>`;
-         let rows = document.querySelectorAll('#tbody-rincian-barang tr');
-         let totalAll = 0;
-         rows.forEach((r, i) => {
-           let n = r.querySelector('.barang-nama').value;
-           let v = parseFloat(r.querySelector('.barang-vol').value)||0;
-           let h = parseFloat(r.querySelector('.barang-harga').value)||0;
-           let k = v*h; totalAll += k;
-           content += `<tr><td>${i+1}</td><td style="text-align:left; padding-left:5px;">${n}</td><td>${v}</td><td>Rp ${h.toLocaleString('id-ID')}</td><td>Rp ${k.toLocaleString('id-ID')}</td></tr>`;
-         });
-         content += `<tr><td colspan="4" style="text-align:right; font-weight:bold; padding-right:10px;">TOTAL</td><td><b>Rp ${totalAll.toLocaleString('id-ID')}</b></td></tr></table>`;
+      const kepsek = document.getElementById('set-nama-kepsek').value;
+      const nipKepsek = document.getElementById('set-nip-kepsek').value;
+      const bendahara = document.getElementById('set-nama-bendahara').value;
+      const nipBendahara = document.getElementById('set-nip-bendahara').value;
+      const sekolah = document.getElementById('set-nama-sekolah').value;
+      const tempat = document.getElementById('set-tempat').value;
+
+      const jenis = document.getElementById('jenis-spj').value;
+      const modeHal = document.getElementById('mode-halaman').value;
+      const uraianKwitansi = document.getElementById('kwitansi-uraian').value || currentBpuData.uraian;
+      const penerimaKwitansi = document.getElementById('kwitansi-penerima').value || '...........................................';
+      const terbilangTeks = angkaKeTerbilang(currentBpuData.nominal);
+
+      // BAGIAN 1: KWITANSI BOSP (Sesuai PDF Contoh LPJ SDN 1 Sukahaji)
+      let html = `
+        <div class="kwitansi-box">
+          <div class="kwitansi-header">
+            <div style="width:180px;"></div>
+            <div class="kwitansi-title">KWITANSI</div>
+            <div style="width:180px; text-align:right; font-size:10.5pt;">
+              No. Bukti : <b>${currentBpuData.noBukti}</b>
+            </div>
+          </div>
+
+          <table class="tabel-info-kwitansi">
+            <tr>
+              <td style="width:160px;">Sudah terima dari</td>
+              <td style="width:15px;">:</td>
+              <td>Bendahara ${sekolah}</td>
+            </tr>
+            <tr>
+              <td>Banyaknya uang</td>
+              <td>:</td>
+              <td style="font-weight:bold; font-size:11.5pt;">Rp ${formatRupiah(currentBpuData.nominal)}</td>
+            </tr>
+            <tr>
+              <td>Terbilang</td>
+              <td>:</td>
+              <td style="font-style:italic; background:#f7f7f7; padding:4px 8px; border:1px solid #ccc;">${terbilangTeks}</td>
+            </tr>
+            <tr>
+              <td>Untuk pembayaran</td>
+              <td>:</td>
+              <td>${uraianKwitansi}</td>
+            </tr>
+          </table>
+
+          <div class="ttd-grid-3">
+            <div>
+              Mengetahui<br>Kepala Sekolah
+              <div style="height:52px;"></div>
+              <b><u>${kepsek}</u></b><br>NIP. ${nipKepsek}
+            </div>
+            <div>
+              Lunas Bayar: ${currentBpuData.tglPanjang}<br>Bendahara
+              <div style="height:52px;"></div>
+              <b><u>${bendahara}</u></b><br>NIP. ${nipBendahara}
+            </div>
+            <div>
+              ${tempat}, ${currentBpuData.tglPanjang}<br>Yang Menerima
+              <div style="height:52px;"></div>
+              <b><u>${penerimaKwitansi}</u></b>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Pemisah antara Kwitansi dan Daftar Penerima / Nota
+      if (modeHal === 'pisah') {
+        html += `<div class="html2pdf__page-break" style="page-break-before: always; margin-top:25px;"></div>`;
+      } else {
+        html += `<div class="garis-potong"></div>`;
       }
 
-      content += `</div>`;
-      area.innerHTML = content;
+      // BAGIAN 2A: DAFTAR PENERIMA HONOR / TRANSPORT / UPAH
+      if (jenis === 'jasa') {
+        const judulDaftar = document.getElementById('judul-daftar-jasa').value || `DAFTAR ${currentBpuData.uraian.toUpperCase()}`;
+        const sumberDana = document.getElementById('sumber-dana-jasa').value || 'DARI DANA BOS REGULER';
 
-      var opt = {
-        margin:       10,
-        filename:     `SPJ_${currentBpuData.noBukti}.pdf`,
+        html += `
+          <div style="position:relative; margin-bottom:8px;">
+            <div style="position:absolute; right:0; top:0; font-weight:bold; font-size:10.5pt; border:1px solid #000; padding:2px 8px;">
+              ${currentBpuData.noBukti}
+            </div>
+            <div style="text-align:center; font-weight:bold; font-size:11pt; line-height:1.35;">
+              ${judulDaftar}<br>
+              ${sekolah}<br>
+              ${sumberDana}
+            </div>
+          </div>
+
+          <table class="tabel-lpj">
+            <thead>
+              <tr>
+                <th style="width:28px;">NO</th>
+                <th>NAMA</th>
+                <th>JAB</th>
+                <th>STATUS<br>KEPEG</th>
+                <th style="width:38px;">VOL</th>
+                <th style="width:82px;">HARGA<br>SATUAN</th>
+                <th style="width:85px;">JUMLAH</th>
+                <th style="width:65px;">PPh.21</th>
+                <th style="width:88px;">DITERIMAKAN</th>
+                <th style="width:95px;">TANDA TANGAN</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        let totJumlah = 0;
+        let totPph = 0;
+        let totTerima = 0;
+
+        document.querySelectorAll('#tbody-rincian-jasa tr').forEach((tr, idx) => {
+          const nama = tr.querySelector('.jasa-nama').value || '-';
+          const jab = tr.querySelector('.jasa-jab').value || '-';
+          const status = tr.querySelector('.jasa-status').value || '-';
+          const vol = parseFloat(tr.querySelector('.jasa-vol').value) || 0;
+          const hrg = parseFloat(tr.querySelector('.jasa-harga').value) || 0;
+          const pph = parseFloat(tr.querySelector('.jasa-pph').value) || 0;
+          const jml = vol * hrg;
+          const diterima = jml - pph;
+
+          totJumlah += jml;
+          totPph += pph;
+          totTerima += diterima;
+
+          html += `
+            <tr style="height:32px;">
+              <td style="text-align:center;">${idx + 1}</td>
+              <td>${nama}</td>
+              <td style="text-align:center;">${jab}</td>
+              <td style="text-align:center;">${status}</td>
+              <td style="text-align:center;">${vol}</td>
+              <td style="text-align:right;">${formatRupiah(hrg)}</td>
+              <td style="text-align:right;">${formatRupiah(jml)}</td>
+              <td style="text-align:right;">${pph > 0 ? formatRupiah(pph) : ''}</td>
+              <td style="text-align:right;">${formatRupiah(diterima)}</td>
+              <td style="font-size:8pt; color:#555; vertical-align:top; padding-top:2px;">${idx + 1}. ............</td>
+            </tr>
+          `;
+        });
+
+        html += `
+            </tbody>
+            <tfoot>
+              <tr style="font-weight:bold; background:#f9f9f9;">
+                <td colspan="6" style="text-align:right; padding-right:10px;">JUMLAH</td>
+                <td style="text-align:right;">${formatRupiah(totJumlah)}</td>
+                <td style="text-align:right;">${totPph > 0 ? formatRupiah(totPph) : ''}</td>
+                <td style="text-align:right;">${formatRupiah(totTerima)}</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <div class="ttd-grid-2">
+            <div>
+              <br>Mengetahui<br>Kepala Sekolah
+              <div style="height:52px;"></div>
+              <b><u>${kepsek}</u></b><br>NIP. ${nipKepsek}
+            </div>
+            <div>
+              ${tempat}, ${currentBpuData.tglPanjang}<br>
+              Lunas Bayar: ${currentBpuData.tglPanjang}<br>
+              Bendahara
+              <div style="height:52px;"></div>
+              <b><u>${bendahara}</u></b><br>NIP. ${nipBendahara}
+            </div>
+          </div>
+        `;
+      } else {
+        // BAGIAN 2B: NOTA PEMBELIAN BARANG RESMI
+        const idxToko = document.getElementById('pilih-toko').value;
+        const namaToko = (idxToko !== "" && sheetCache.Master_Toko.data[idxToko]) ? sheetCache.Master_Toko.data[idxToko][0] : 'TOKO / VENDOR PENYEDIA';
+        const telpToko = (idxToko !== "" && sheetCache.Master_Toko.data[idxToko]) ? (sheetCache.Master_Toko.data[idxToko][4] || '') : '';
+        const kasir = document.getElementById('nama-kasir-toko').value || '........................';
+        const alamatToko = document.getElementById('alamat-toko-input').value || '';
+        const noNota = document.getElementById('no-nota-toko').value || `NOTA/${currentBpuData.noBukti}`;
+
+        html += `
+          <div style="border:1.5px solid #000; padding:12px 16px;">
+            <div style="display:flex; justify-content:space-between; border-bottom:2px double #000; padding-bottom:8px; margin-bottom:10px;">
+              <div>
+                <div style="font-size:13pt; font-weight:bold;">${namaToko.toUpperCase()}</div>
+                <div style="font-size:9.5pt;">${alamatToko} ${telpToko ? '• Telp: ' + telpToko : ''}</div>
+              </div>
+              <div style="text-align:right; font-size:9.5pt;">
+                <b>NOTA kontan</b><br>
+                No. Nota : <b>${noNota}</b><br>
+                Tanggal : ${currentBpuData.tglPanjang}<br>
+                Kepada Yth : <b>${sekolah}</b>
+              </div>
+            </div>
+
+            <table class="tabel-lpj">
+              <thead>
+                <tr>
+                  <th style="width:32px;">NO</th>
+                  <th>NAMA BARANG / URAIAN</th>
+                  <th style="width:60px;">VOLUME</th>
+                  <th style="width:75px;">SATUAN</th>
+                  <th style="width:110px;">HARGA SATUAN</th>
+                  <th style="width:115px;">JUMLAH (Rp)</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+
+        let totalNota = 0;
+        document.querySelectorAll('#tbody-rincian-barang tr').forEach((tr, idx) => {
+          const nm = tr.querySelector('.barang-nama').value || '-';
+          const v = parseFloat(tr.querySelector('.barang-vol').value) || 0;
+          const sat = tr.querySelector('.barang-satuan').value || '';
+          const h = parseFloat(tr.querySelector('.barang-harga').value) || 0;
+          const jml = v * h;
+          totalNota += jml;
+
+          html += `
+            <tr>
+              <td style="text-align:center;">${idx + 1}</td>
+              <td>${nm}</td>
+              <td style="text-align:center;">${v}</td>
+              <td style="text-align:center;">${sat}</td>
+              <td style="text-align:right;">Rp ${formatRupiah(h)}</td>
+              <td style="text-align:right;">Rp ${formatRupiah(jml)}</td>
+            </tr>
+          `;
+        });
+
+        html += `
+              </tbody>
+              <tfoot>
+                <tr style="font-weight:bold; background:#f5f5f5;">
+                  <td colspan="5" style="text-align:right; padding-right:10px;">JUMLAH TOTAL</td>
+                  <td style="text-align:right;">Rp ${formatRupiah(totalNota)}</td>
+                </tr>
+              </tfoot>
+            </table>
+
+            <div style="font-size:9.5pt; font-style:italic; margin-bottom:10px;">
+              Terbilang : <b>${angkaKeTerbilang(totalNota)}</b>
+            </div>
+
+            <div class="ttd-grid-2">
+              <div>
+                Tanda Terima,<br>Pembeli / Bendahara
+                <div style="height:48px;"></div>
+                <b><u>${bendahara}</u></b>
+              </div>
+              <div>
+                ${tempat}, ${currentBpuData.tglPanjang}<br>Hormat Kami / Penyedia,
+                <div style="height:48px;"></div>
+                <b><u>${kasir}</u></b>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      document.getElementById('print-area-a4').innerHTML = html;
+    }
+
+    function unduhFilePDF() {
+      if (!currentBpuData) return;
+      const element = document.getElementById('print-area-a4');
+      const opt = {
+        margin:       [5, 5, 5, 5],
+        filename:     `LPJ_${currentBpuData.noBukti}_SDN1Sukahaji.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 },
+        html2canvas:  { scale: 2, useCORS: true },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
-      
-      html2pdf().set(opt).from(area).save().then(() => {
-        area.classList.add('d-none');
-        area.innerHTML = '';
-      });
+      html2pdf().set(opt).from(element).save();
     }
   </script>
 </body>
