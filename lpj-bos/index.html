@@ -140,8 +140,65 @@
     }
 
     // Fungsi Upload (Akan kita sempurnakan dengan validasi di tahap berikutnya)
-    function uploadData(sheetName) {
-      alert("Fitur upload ke " + sheetName + " sedang disiapkan. Kita perlu menambahkan fungsi POST di Google Apps Script terlebih dahulu.");
+    // FUNGSI UPLOAD DATA KE DATABASE
+    async function uploadData(sheetName) {
+      // Tentukan input file mana yang diklik berdasarkan nama sheet
+      const inputId = sheetName === 'DB_BKU' ? 'file-bku' : 'file-arkas';
+      const fileInput = document.getElementById(inputId);
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert("Silakan pilih file CSV terlebih dahulu sebelum menekan tombol Upload.");
+        return;
+      }
+
+      // Ubah tampilan tombol menjadi efek "Loading..."
+      const btn = fileInput.nextElementSibling;
+      const originalBtnText = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Mengirim data...';
+      btn.disabled = true;
+
+      // Membaca file CSV
+      const reader = new FileReader();
+      
+      reader.onload = async function(e) {
+        const csvText = e.target.result;
+        
+        // Siapkan paket data (Payload)
+        const payload = {
+          action: 'upload',
+          sheetName: sheetName,
+          csvText: csvText
+        };
+
+        try {
+          // Kirim POST Request ke Google Apps Script
+          const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            // Google Apps Script merespon postData.contents dalam bentuk text plain (stringify)
+            body: JSON.stringify(payload)
+          });
+          
+          const result = await response.json();
+          
+          if (result.status === "success") {
+            alert("BERHASIL: " + result.message);
+            fileInput.value = ""; // Kosongkan form input file setelah berhasil
+          } else {
+            alert("GAGAL: " + result.message);
+          }
+        } catch (error) {
+          alert("Terjadi kesalahan koneksi/CORS saat mengupload. Pastikan Apps Script di-deploy dengan opsi 'Anyone'.");
+          console.error(error);
+        } finally {
+          // Kembalikan tombol seperti semula
+          btn.innerHTML = originalBtnText;
+          btn.disabled = false;
+        }
+      };
+
+      // Mulai proses baca file sebagai teks
+      reader.readAsText(file);
     }
   </script>
 </body>
