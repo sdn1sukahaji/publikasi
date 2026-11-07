@@ -94,14 +94,63 @@
           </div>
 
           <!-- Placeholder Konten Lainnya -->
+          <!-- Konten Penyesuaian & Cetak -->
           <div class="tab-pane fade" id="content-cetak" role="tabpanel">
-             <div class="card shadow-sm"><div class="card-body"><h5>Penyesuaian & Cetak SPJ</h5><p>Fitur ini akan dibangun pada tahap selanjutnya.</p></div></div>
-          </div>
-          <div class="tab-pane fade" id="content-pegawai" role="tabpanel">
-             <div class="card shadow-sm"><div class="card-body"><h5>Master Pegawai (CRUD)</h5><p>Fitur ini akan dibangun pada tahap selanjutnya.</p></div></div>
-          </div>
-          <div class="tab-pane fade" id="content-toko" role="tabpanel">
-             <div class="card shadow-sm"><div class="card-body"><h5>Master Toko (CRUD)</h5><p>Fitur ini akan dibangun pada tahap selanjutnya.</p></div></div>
+            <div class="card shadow-sm border-primary">
+              <div class="card-header bg-white">
+                <h5 class="mb-0 text-primary"><i class="bi bi-printer"></i> Penyesuaian & Cetak Dokumen SPJ</h5>
+              </div>
+              <div class="card-body">
+                
+                <!-- 1. Form Pencarian BPU -->
+                <div class="row mb-4 bg-light p-3 rounded">
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold">Cari Berdasarkan NO. BUKTI (Sesuai BKU)</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-search"></i></span>
+                      <input type="text" id="search-bpu" class="form-control" placeholder="Contoh: BPU172" onkeypress="if(event.key === 'Enter') cariBPU()">
+                      <button class="btn btn-primary" onclick="cariBPU()" id="btn-cari">Cari Data</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 2. Area Hasil Pencarian (Disembunyikan default) -->
+                <div id="area-hasil-bpu" class="d-none">
+                  
+                  <!-- Info Global BPU -->
+                  <div class="alert alert-success border-success mb-4">
+                    <div class="row">
+                      <div class="col-md-3"><strong>Tanggal:</strong> <br><span id="info-tanggal">-</span></div>
+                      <div class="col-md-3"><strong>No. Bukti:</strong> <br><span id="info-nobukti" class="fs-5 fw-bold text-dark">-</span></div>
+                      <div class="col-md-6"><strong>Total Pengeluaran:</strong> <br><span id="info-nominal" class="fs-5 fw-bold text-danger">-</span></div>
+                      <div class="col-md-12 mt-2 pt-2 border-top border-success">
+                        <strong>Uraian BKU:</strong> <br><span id="info-uraian" class="fst-italic">-</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 3. Pilihan Jenis SPJ -->
+                  <div class="mb-3 p-3 border rounded border-warning">
+                    <label class="form-label fw-bold text-dark">Langkah 1: Pilih Output Dokumen LPJ</label>
+                    <select id="jenis-spj" class="form-select border-warning" onchange="ubahTampilanRincian()">
+                      <option value="">-- Pilih Jenis Transaksi --</option>
+                      <option value="jasa">BELANJA JASA (Kwitansi + Daftar Penerima Honor/Transport)</option>
+                      <option value="barang">BELANJA BARANG (Kwitansi + Nota Toko)</option>
+                    </select>
+                  </div>
+
+                  <!-- 4. Area Rincian Penyesuaian Dinamis -->
+                  <div id="area-rincian" class="d-none">
+                    <h5 class="fw-bold mt-4 mb-3" id="judul-rincian">Langkah 2: Penyesuaian Rincian</h5>
+                    <div class="card card-body bg-light border-0">
+                      <p class="text-muted mb-0"><i class="bi bi-tools"></i> <em>Area tabel dinamis (pemecahan nominal, pajak, dan pemilihan Master Pegawai/Toko) sedang disiapkan untuk tahap selanjutnya.</em></p>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
           </div>
 
         </div>
@@ -203,6 +252,94 @@
 
       // Mulai proses baca file sebagai teks
       reader.readAsText(file);
+    }
+    // =======================================================
+    // MODUL PENYESUAIAN & CETAK
+    // =======================================================
+    
+    // Fungsi 1: Mencari data BPU dari Database
+    async function cariBPU() {
+      const bpu = document.getElementById('search-bpu').value.trim();
+      if(!bpu) {
+        alert("Silakan ketik NO. BUKTI terlebih dahulu."); return;
+      }
+
+      const btnCari = document.getElementById('btn-cari');
+      const originalText = btnCari.innerHTML;
+      btnCari.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Mencari...';
+      btnCari.disabled = true;
+
+      try {
+        // Menarik data dari sheet DB_BKU via Apps Script API
+        const response = await fetch(`${SCRIPT_URL}?action=read&sheetName=DB_BKU`);
+        const result = await response.json();
+
+        if(result.status === "success") {
+          const dataBku = result.data;
+          
+          // Memfilter baris yang NO. BUKTI-nya (kolom ke-4/index 3) cocok dengan inputan
+          const foundData = dataBku.filter(row => row[3].toString().toUpperCase() === bpu.toUpperCase());
+          
+          if(foundData.length > 0) {
+            let totalNominal = 0;
+            let uraianLengkap = [];
+            
+            // Loop jika ada lebih dari 1 baris dengan No Bukti yang sama
+            foundData.forEach(row => {
+              // Menghapus titik/koma agar angka bisa dihitung, lalu menjumlahkannya (Kolom Pengeluaran = index 6)
+              let nominal = parseFloat(row[6].toString().replace(/[^0-9,-]+/g,"")) || 0;
+              totalNominal += nominal;
+              uraianLengkap.push(row[4]); // Ambil teks uraian (index 4)
+            });
+
+            // Memasukkan data ke dalam UI (Dashboard HTML)
+            document.getElementById('info-tanggal').innerText = foundData[0][0]; // Tanggal dari baris pertama
+            document.getElementById('info-nobukti').innerText = bpu.toUpperCase();
+            document.getElementById('info-uraian').innerText = uraianLengkap.join(" | ");
+            
+            // Format Rupiah Indonesia
+            document.getElementById('info-nominal').innerText = new Intl.NumberFormat('id-ID', { 
+              style: 'currency', 
+              currency: 'IDR',
+              minimumFractionDigits: 0
+            }).format(totalNominal);
+
+            // Tampilkan panel hasil
+            document.getElementById('area-hasil-bpu').classList.remove('d-none');
+            // Reset dropdown pilihan
+            document.getElementById('jenis-spj').value = "";
+            document.getElementById('area-rincian').classList.add('d-none');
+            
+          } else {
+            alert(`No. Bukti "${bpu.toUpperCase()}" tidak ditemukan di database BKU.`);
+            document.getElementById('area-hasil-bpu').classList.add('d-none');
+          }
+        }
+      } catch(error) {
+         console.error(error);
+         alert("Gagal menarik data. Periksa koneksi internet Anda.");
+      } finally {
+         btnCari.innerHTML = originalText;
+         btnCari.disabled = false;
+      }
+    }
+
+    // Fungsi 2: Memunculkan area rincian sesuai jenis belanja (Trigger)
+    function ubahTampilanRincian() {
+      const jenis = document.getElementById('jenis-spj').value;
+      const areaRincian = document.getElementById('area-rincian');
+      const judulRincian = document.getElementById('judul-rincian');
+      
+      if(jenis === "") {
+        areaRincian.classList.add('d-none');
+      } else {
+        areaRincian.classList.remove('d-none');
+        if(jenis === 'jasa') {
+           judulRincian.innerHTML = "Langkah 2: Rincian Penerima Honor/Jasa";
+        } else {
+           judulRincian.innerHTML = "Langkah 2: Rincian Nota Toko & Barang";
+        }
+      }
     }
   </script>
 </body>
