@@ -1,1 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Manajemen SPJ BOS</title>
+    <!-- Menggunakan Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light">
+    
+    <div class="container mt-5">
+      <h2 class="text-center mb-4">Sistem Manajemen SPJ BOS SDN 1 Sukahaji</h2>
+      
+      <div class="card shadow-sm">
+        <div class="card-body text-center">
+          <h5 class="card-title">Status Koneksi Database via API</h5>
+          <p id="status-text" class="text-primary">Siap menguji koneksi...</p>
+          <button class="btn btn-primary mt-3" onclick="testConnection()">Test Tarik Data BKU</button>
+        </div>
+      </div>
+      
+      <div class="mt-4" id="data-result"></div>
+    </div>
 
+    <script>
+      // URL Apps Script milik Anda
+      const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyUwXqHsbop8zV185lnOMGLWa85cBAfd97wy_GTrwe9hW2lV5BzhppGyy8JcfOF6W2D2w/exec';
+
+      async function testConnection() {
+        const statusText = document.getElementById('status-text');
+        const dataResult = document.getElementById('data-result');
+        
+        statusText.innerHTML = "Sedang mengambil data dari Spreadsheet...";
+        dataResult.innerHTML = "";
+
+        try {
+          // Melakukan GET request ke Apps Script dengan parameter action=read & sheetName=DB_BKU
+          const response = await fetch(`${SCRIPT_URL}?action=read&sheetName=DB_BKU`);
+          const result = await response.json();
+
+          if (result.status === "success") {
+            statusText.innerHTML = `<span class='text-success'>Koneksi Berhasil! Ditemukan ${result.data.length} baris data.</span>`;
+            
+            if (result.data.length > 0) {
+               // Menampilkan sampel data baris pertama dari BKU
+               dataResult.innerHTML = `
+                 <div class='alert alert-info'>
+                   <strong>Data BKU Baris Pertama (Preview):</strong><br>
+                   ${result.headers[3]}: <strong>${result.data[0][3]}</strong><br>
+                   ${result.headers[4]}: ${result.data[0][4]}<br>
+                   ${result.headers[6]}: Rp ${result.data[0][6]}
+                 </div>
+               `;
+            }
+          } else {
+            statusText.innerHTML = `<span class='text-danger'>Error: ${result.message}</span>`;
+          }
+        } catch (error) {
+          statusText.innerHTML = `<span class='text-danger'>Gagal terhubung ke API. Pastikan URL benar dan ada akses internet.</span>`;
+          console.error('Error fetching data:', error);
+        }
+      }
+    </script>
+  </body>
+</html>
