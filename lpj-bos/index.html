@@ -1495,9 +1495,18 @@
     // =========================================================================
     // 4B. PENYESUAIAN BELANJA JASA (BARIS OTOMATIS DARI VOLUME DB_ARKAS)
     // =========================================================================
+    // =========================================================================
+    // 4B. PENYESUAIAN BELANJA JASA (BARIS = TOTAL BKU / TARIF HARGA ARKAS
+    //     & PENERIMA KWITANSI OTOMATIS DARI BARIS PERTAMA MASTER PEGAWAI)
+    // =========================================================================
     function siapkanPenyesuaianBelanjaJasa() {
       document.getElementById('section-penyesuaian-barang').classList.add('d-none');
       document.getElementById('section-penyesuaian-jasa').classList.remove('d-none');
+
+      // Reset kolom Nama Penerima Kwitansi agar tidak menyisakan nama dari BPU sebelumnya
+      const elPenerimaKw = document.getElementById('kwitansi-penerima-input');
+      elPenerimaKw.value = '';
+      delete elPenerimaKw.dataset.manual;
 
       // Rumus Uraian Kwitansi Belanja Jasa:
       // "Biaya " + [Uraian Ref_Kode_Rekening] + " " + [Uraian_Kegiatan_Kwitansi]
@@ -1509,29 +1518,52 @@
       const judulDaftar = `DAFTAR PENERIMA ${activeBPU.uraianRekening} ${activeBPU.uraianKegiatan}`.replace(/\s+/g, ' ').trim().toUpperCase();
       document.getElementById('input-judul-daftar-jasa').value = judulDaftar;
 
-      // Cocokkan Kode Kegiatan & Kode Rekening dengan DB_ARKAS untuk melihat Volume
+      // Cocokkan Kode Kegiatan & Kode Rekening dengan DB_ARKAS untuk mengambil TARIF_HARGA (Harga Satuan)
       const kodeKegClean = bersihkanKode(activeBPU.kodeKegiatan);
       const kodeRekClean = bersihkanKode(activeBPU.kodeRekening);
-      const uraianBkuClean = (activeBPU.bkuRows[0][4] || '').toString().toLowerCase().trim();
+      const uraianBkuClean = (activeBPU.bkuRows[0][4] || '').toString().toLowerCase().replace(/[-_]+$/g, '').trim();
 
       let kandidatArkas = dbCache.DB_ARKAS.data.filter(ar =>
-        bersihkanKode(ar[2]) === kodeKegClean && bersihkanKode(ar[1]) === kodeRekClean && parseNominal(ar[6]) > 0
+        bersihkanKode(ar[2]) === kodeKegClean &&
+        bersihkanKode(ar[1]) === kodeRekClean &&
+        parseNominal(ar[8]) > 0
       );
 
-      // Jika ada beberapa baris dengan kode kegiatan & rekening yang sama di ARKAS, prioritaskan yang uraiannya mirip
-      let rowArkasCocok = kandidatArkas.find(ar => (ar[5] || '').toString().toLowerCase().trim() === uraianBkuClean) || kandidatArkas[0];
+      let kandidatUraianCocok = kandidatArkas.filter(ar => {
+        const arUraian = (ar[5] || '').toString().toLowerCase().replace(/[-_]+$/g, '').trim();
+        return arUraian === uraianBkuClean || arUraian.includes(uraianBkuClean) || uraianBkuClean.includes(arUraian);
+      });
+
+      let sumberKandidat = kandidatUraianCocok.length > 0 ? kandidatUraianCocok : kandidatArkas;
+
+      // Pilih baris ARKAS yang Tarif_Harga-nya (kolom index 8) membagi habis Total BKU secara bulat/genap
+      let kandidatGenap = sumberKandidat.filter(ar => {
+        const tarif = parseNominal(ar[8]);
+        const volMaxArkas = parseNominal(ar[6]) || 999;
+        const hasilBagi = activeBPU.totalBku / tarif;
+        return tarif > 0 && (activeBPU.totalBku % tarif === 0) && hasilBagi <= volMaxArkas;
+      });
+
+      let rowArkasTerpilih = kandidatGenap[0] || sumberKandidat[0] || null;
 
       let jumlahBarisOtomatis = 1;
-      if (rowArkasCocok) {
-        const volArkas = Math.round(parseNominal(rowArkasCocok[6]));
-        if (volArkas > 0 && volArkas <= 100) {
-          jumlahBarisOtomatis = volArkas;
+      let nilaiSatuanOtomatis = activeBPU.totalBku;
+
+      if (rowArkasTerpilih) {
+        const tarifHargaArkas = parseNominal(rowArkasTerpilih[8]);
+        if (tarifHargaArkas > 0 && activeBPU.totalBku % tarifHargaArkas === 0) {
+          jumlahBarisOtomatis = Math.round(activeBPU.totalBku / tarifHargaArkas);
+          nilaiSatuanOtomatis = tarifHargaArkas;
         }
       }
 
-      const nilaiSatuanOtomatis = Math.round(activeBPU.totalBku / jumlahBarisOtomatis);
+      if (jumlahBarisOtomatis < 1 || jumlahBarisOtomatis > 100) {
+        jumlahBarisOtomatis = 1;
+        nilaiSatuanOtomatis = activeBPU.totalBku;
+      }
+
       document.getElementById('badge-info-vol-jasa').innerText =
-        `Otomatis ${jumlahBarisOtomatis} Baris (Volume ARKAS: ${jumlahBarisOtomatis} × Rp ${formatRibuan(nilaiSatuanOtomatis)})`;
+        `Otomatis ${jumlahBarisOtomatis} Baris (Rp ${formatRibuan(activeBPU.totalBku)} ÷ Rp ${formatRibuan(nilaiSatuanOtomatis)})`;
 
       const tbody = document.getElementById('tbody-item-jasa');
       tbody.innerHTML = '';
@@ -1550,7 +1582,7 @@
       return html;
     }
 
-    function pilihPegawaiDariDropdown(selectEl) {
+        function pilihPegawaiDariDropdown(selectEl) {
       const tr = selectEl.closest('tr');
       const idx = selectEl.value;
       if (idx !== "" && dbCache.Master_Pegawai.data[idx]) {
@@ -1558,7 +1590,20 @@
         tr.querySelector('.jasa-nama').value = p[0] || '';
         tr.querySelector('.jasa-jab').value = p[2] || '';
         tr.querySelector('.jasa-status').value = p[3] || '';
+      } else {
+        tr.querySelector('.jasa-nama').value = '';
+        tr.querySelector('.jasa-jab').value = '';
+        tr.querySelector('.jasa-status').value = '';
       }
+
+      // Jika yang diubah adalah baris pertama (index 0), paksa sinkron ke Penerima Kwitansi
+      const allRows = Array.from(document.querySelectorAll('#tbody-item-jasa tr'));
+      if (allRows.indexOf(tr) === 0) {
+        const elPenerimaKw = document.getElementById('kwitansi-penerima-input');
+        delete elPenerimaKw.dataset.manual;
+        elPenerimaKw.value = tr.querySelector('.jasa-nama').value.trim();
+      }
+
       hitungTotalRincianJasa();
     }
 
@@ -1608,13 +1653,13 @@
       hitungTotalRincianJasa();
     }
 
-    function hitungTotalRincianJasa() {
+        function hitungTotalRincianJasa() {
       let totalRincian = 0;
-      let namaPenerimaPertama = '';
+      let namaBarisPertama = '';
 
       document.querySelectorAll('#tbody-item-jasa tr').forEach((tr, idx) => {
         const nm = tr.querySelector('.jasa-nama').value.trim();
-        if (idx === 0 && nm) namaPenerimaPertama = nm;
+        if (idx === 0) namaBarisPertama = nm;
         const v = parseFloat(tr.querySelector('.jasa-vol').value) || 0;
         const h = parseFloat(tr.querySelector('.jasa-harga').value) || 0;
         const sub = v * h;
@@ -1622,9 +1667,10 @@
         tr.querySelector('.jasa-jumlah-label').innerText = `Rp ${formatRibuan(sub)}`;
       });
 
+      // Otomatis isi Nama "Yang Menerima" di Kwitansi dari orang pada Baris Pertama (No. 1)
       const elPenerimaKw = document.getElementById('kwitansi-penerima-input');
-      if (namaPenerimaPertama && !elPenerimaKw.dataset.manual) {
-        elPenerimaKw.value = namaPenerimaPertama;
+      if (!elPenerimaKw.dataset.manual) {
+        elPenerimaKw.value = namaBarisPertama;
       }
 
       const target = activeBPU ? activeBPU.totalBku : 0;
@@ -1637,7 +1683,6 @@
       }
       renderLembarKerjaLPJ();
     }
-
     // =========================================================================
     // 5. GENERATOR DOKUMEN LPJ FORMAL (PERSIS CONTOH EXCEL PRINT PREVIEW)
     // =========================================================================
