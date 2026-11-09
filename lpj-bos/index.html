@@ -270,24 +270,46 @@
 
     /* Pengaturan Cetak Printer / Save as PDF Browser */
     @media print {
-      body { background: #fff !important; margin: 0; padding: 0; }
-      .d-print-none { display: none !important; }
-      #preview-cetak-wrapper {
-        background: transparent !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        overflow: visible !important;
+      /* 1. Sembunyikan SEMUA elemen body secara default */
+      body * {
+        visibility: hidden !important;
       }
-      #print-area-a4 {
+      
+      /* 2. Bersihkan margin dan padding body */
+      body, html {
+        background: #fff !important;
+        margin: 0 !important;
+        padding: 0 !important;
         width: 100% !important;
-        min-height: auto !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        box-shadow: none !important;
+        height: 100% !important;
       }
+
+      /* 3. Tampilkan HANYA area cetak A4 dan isinya */
+      #print-area-a4, #print-area-a4 * {
+        visibility: visible !important;
+      }
+
+      /* 4. Posisikan area cetak di sudut kiri atas kertas */
+      #print-area-a4 {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important; /* Hapus padding agar margin bawaan browser yang bekerja */
+        box-shadow: none !important;
+        transform: none !important;
+      }
+
+      /* 5. Pengaturan halaman kertas */
       @page {
         size: A4 portrait;
-        margin: 12mm 14mm;
+        margin: 10mm 15mm; /* Margin standar dokumen resmi */
+      }
+      
+      /* Opsi tambahan untuk menghilangkan header/footer URL browser */
+      @page :first {
+        margin-top: 10mm;
       }
     }
   </style>
@@ -1952,16 +1974,29 @@
     function unduhLangsungPDF() {
       if (!activeBPU) return;
       const area = document.getElementById('print-area-a4');
+      
+      // Simpan padding asli sebelum diubah
+      const originalPadding = area.style.padding;
+      const originalBoxShadow = area.style.boxShadow;
+      
+      // Hilangkan bayangan dan sesuaikan padding khusus untuk mesin html2pdf
+      area.style.padding = '0';
+      area.style.boxShadow = 'none';
+      
       const opt = {
-        margin: [6, 6, 6, 6],
-        filename: `LPJ_${activeBPU.noBukti}_SDN1Sukahaji.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        margin:       [10, 15, 10, 15], // Margin: Atas, Kanan, Bawah, Kiri (dalam mm)
+        filename:     `LPJ_${activeBPU.noBukti}_SDN1Sukahaji.pdf`,
+        image:        { type: 'jpeg', quality: 1.0 },
+        html2canvas:  { scale: 2, useCORS: true, windowWidth: 800 },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
-      html2pdf().set(opt).from(area).save();
+      
+      html2pdf().set(opt).from(area).save().then(() => {
+        // Kembalikan ke tampilan semula setelah selesai diunduh
+        area.style.padding = originalPadding;
+        area.style.boxShadow = originalBoxShadow;
+      });
     }
-
     // =========================================================================
     // 6. TABEL & FULL CRUD UNTUK SELURUH 6 SHEET + SHORTCUT INPUT CEPAT
     // =========================================================================
