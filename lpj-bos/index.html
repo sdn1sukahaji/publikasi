@@ -207,7 +207,7 @@
       padding: 4px 8px !important;
     }
 
-    /* Grid Tanda Tangan Kwitansi (3 Kolom, Nama Kepsek 1 Baris / Nowrap) */
+    /* Grid Tanda Tangan Kwitansi */
     .ttd-kwitansi-grid {
       display: grid;
       grid-template-columns: 38% 34% 28%;
@@ -259,7 +259,6 @@
       background-color: #ffffff;
     }
 
-    /* Blok Tanda Tangan Bawah Daftar Penerima */
     .ttd-bawah-wrapper {
       page-break-inside: avoid;
       margin-top: 12px;
@@ -268,48 +267,46 @@
       font-size: 9.5pt;
     }
 
-    /* Pengaturan Cetak Printer / Save as PDF Browser */
+    /* Pengaturan Cetak Printer yang Disempurnakan */
     @media print {
-      /* 1. Sembunyikan SEMUA elemen body secara default */
       body * {
         visibility: hidden !important;
       }
       
-      /* 2. Bersihkan margin dan padding body */
       body, html {
-        background: #fff !important;
+        background: transparent !important;
         margin: 0 !important;
         padding: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
       }
 
-      /* 3. Tampilkan HANYA area cetak A4 dan isinya */
-      #print-area-a4, #print-area-a4 * {
+      /* Tampilkan hanya kontainer cetak dan seluruh elemen di dalamnya */
+      #preview-cetak-wrapper,
+      #print-area-a4,
+      #print-area-a4 * {
         visibility: visible !important;
       }
 
-      /* 4. Posisikan area cetak di sudut kiri atas kertas */
-      #print-area-a4 {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 100% !important;
+      #preview-cetak-wrapper {
+        background: transparent !important;
+        padding: 0 !important;
         margin: 0 !important;
-        padding: 0 !important; /* Hapus padding agar margin bawaan browser yang bekerja */
-        box-shadow: none !important;
-        transform: none !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
       }
 
-      /* 5. Pengaturan halaman kertas */
+      #print-area-a4 {
+        position: relative !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+      }
+
       @page {
         size: A4 portrait;
-        margin: 10mm 15mm; /* Margin standar dokumen resmi */
-      }
-      
-      /* Opsi tambahan untuk menghilangkan header/footer URL browser */
-      @page :first {
-        margin-top: 10mm;
+        margin: 10mm 15mm;
       }
     }
   </style>
@@ -390,9 +387,7 @@
       <div class="col-lg-10 col-md-9">
         <div class="tab-content">
 
-          <!-- ==========================================
-               1. TAB DASHBOARD
-               ========================================== -->
+          <!-- TAB DASHBOARD -->
           <div class="tab-pane fade show active" id="pane-dashboard" role="tabpanel">
             <div class="card card-modern mb-3">
               <div class="card-body p-4">
@@ -456,9 +451,7 @@
             </div>
           </div>
 
-          <!-- ==========================================
-               2. TAB PENYESUAIAN & CETAK LPJ (OTOMATISASI INTI)
-               ========================================== -->
+          <!-- TAB PENYESUAIAN & CETAK LPJ (OTOMATISASI INTI) -->
           <div class="tab-pane fade" id="pane-cetak" role="tabpanel">
             <div class="card card-modern mb-4">
               <div class="card-header bg-transparent py-3 d-flex flex-wrap justify-content-between align-items-center">
@@ -495,7 +488,7 @@
                   </div>
                 </div>
 
-                <!-- PERINGATAN 1: JIKA KODE REKENING BELUM ADA DI REF_KODE_REKENING -->
+                <!-- PERINGATAN 1: JIKA KODE REKENING BELUM ADA -->
                 <div id="alert-rekening-missing" class="alert alert-danger border-danger d-none shadow-sm">
                   <div class="d-flex align-items-start gap-3">
                     <i class="fa-solid fa-triangle-exclamation fs-2 text-danger mt-1"></i>
@@ -522,7 +515,7 @@
                   </div>
                 </div>
 
-                <!-- AREA UTAMA PENYESUAIAN & PREVIEW (MUNCUL UNTUK BELANJA BARANG / BELANJA JASA) -->
+                <!-- AREA UTAMA PENYESUAIAN & PREVIEW -->
                 <div id="workspace-lpj" class="d-none">
 
                   <!-- Info Ringkas BPU & Hasil Pencocokan Referensi -->
@@ -555,7 +548,7 @@
                     </div>
                   </div>
 
-                  <!-- Peringatan Kecil Jika Kode Kegiatan Belum Ada di Uraian_Kegiatan_Kwitansi -->
+                  <!-- Peringatan Kecil Jika Kode Kegiatan Belum Ada -->
                   <div id="alert-kegiatan-missing" class="alert alert-warning py-2 px-3 d-none d-flex justify-content-between align-items-center mb-3">
                     <span><i class="fa-solid fa-circle-info me-2"></i>Kode Kegiatan <b id="kode-keg-missing-val"></b> belum ditemukan di <code>Uraian_Kegiatan_Kwitansi</code>.</span>
                     <button class="btn btn-xs btn-warning fw-bold btn-sm" onclick="bukaModalTambahKegiatanCepat()">+ Tambah Uraian Kegiatan</button>
@@ -585,16 +578,13 @@
                     </div>
                   </div>
 
-                  <!-- =====================================================
-                       PANEL KHUSUS 1: BELANJA BARANG (KWITANSI + NOTA TOKO)
-                       ===================================================== -->
+                  <!-- PANEL KHUSUS 1: BELANJA BARANG (KWITANSI + NOTA TOKO) -->
                   <div id="section-penyesuaian-barang" class="card border-primary mb-4 d-none">
                     <div class="card-header bg-primary text-white py-2 d-flex justify-content-between align-items-center">
                       <span class="fw-bold"><i class="fa-solid fa-receipt me-1"></i> Penyesuaian Belanja Barang (Kwitansi & Nota Toko)</span>
                       <span class="badge bg-light text-primary" id="info-match-barang-badge">Otomatisasi Harga & Volume ARKAS</span>
                     </div>
                     <div class="card-body">
-                      <!-- Pilih Nama Toko & Pelayan -->
                       <div class="row g-3 mb-3 p-2 rounded bg-body-tertiary border">
                         <div class="col-md-4">
                           <label class="form-label fw-bold small mb-1">Pilih Nama Toko (Master_Toko):</label>
@@ -614,12 +604,10 @@
                         </div>
                       </div>
 
-                      <!-- Info Penyesuaian Harga Jika Ada Beberapa Harga -->
                       <div id="alert-multi-harga-barang" class="alert alert-warning py-2 px-3 small d-none">
-                        <i class="fa-solid fa-Sliders me-1"></i> <b>Perhatian:</b> Ditemukan barang dengan beberapa pilihan harga di <code>DB_ARKAS</code> yang menghasilkan pembagian volume bulat. Silakan pilih harga satuan yang sesuai pada kolom penyesuaian di bawah.
+                        <i class="fa-solid fa-sliders me-1"></i> <b>Perhatian:</b> Ditemukan barang dengan beberapa pilihan harga di <code>DB_ARKAS</code> yang menghasilkan pembagian volume bulat. Silakan pilih harga satuan yang sesuai pada kolom penyesuaian di bawah.
                       </div>
 
-                      <!-- Tabel Item Nota Barang -->
                       <div class="table-responsive">
                         <table class="table table-bordered table-sm align-middle mb-0">
                           <thead class="table-light text-center">
@@ -639,9 +627,7 @@
                     </div>
                   </div>
 
-                  <!-- =====================================================
-                       PANEL KHUSUS 2: BELANJA JASA (KWITANSI + DAFTAR PENERIMA)
-                       ===================================================== -->
+                  <!-- PANEL KHUSUS 2: BELANJA JASA (KWITANSI + DAFTAR PENERIMA) -->
                   <div id="section-penyesuaian-jasa" class="card border-primary mb-4 d-none">
                     <div class="card-header bg-primary text-white py-2 d-flex justify-content-between align-items-center">
                       <span class="fw-bold"><i class="fa-solid fa-users-line me-1"></i> Penyesuaian Rincian Belanja Jasa (Honor / Transport / Upah)</span>
@@ -699,10 +685,10 @@
                   <!-- TOMBOL AKSI CETAK & DOWNLOAD PDF -->
                   <div class="d-flex flex-wrap gap-2 mb-3">
                     <button class="btn btn-primary btn-lg fw-bold flex-grow-1 shadow-sm" onclick="window.print()">
-                      <i class="fa-solid fa-print me-2"></i>Cetak Dokumen / Simpan PDF Presisi (Ctrl+P)
+                      <i class="fa-solid fa-print me-2"></i>Cetak Dokumen (Ctrl+P) / Print ke PDF
                     </button>
                     <button class="btn btn-success btn-lg fw-bold shadow-sm" onclick="unduhLangsungPDF()">
-                      <i class="fa-solid fa-file-pdf me-2"></i>Unduh File PDF
+                      <i class="fa-solid fa-file-pdf me-2"></i>Unduh File PDF (html2pdf)
                     </button>
                   </div>
 
@@ -714,6 +700,8 @@
                       <label class="form-check-label small fw-semibold" for="switch-pisah-halaman">Pisahkan Rincian ke Halaman Baru</label>
                     </div>
                   </div>
+                  
+                  <!-- BUNGKUSAN PREVIEW YANG SUDAH DIISOLASI CSS -->
                   <div id="preview-cetak-wrapper">
                     <div id="print-area-a4" class="kertas-a4"></div>
                   </div>
@@ -724,9 +712,7 @@
             </div>
           </div>
 
-          <!-- ==========================================
-               3. TAB DATA BKU & ARKAS (UPLOAD + FULL CRUD)
-               ========================================== -->
+          <!-- TAB DATA BKU & ARKAS (UPLOAD + FULL CRUD) -->
           <div class="tab-pane fade" id="pane-bku-arkas" role="tabpanel">
             <div class="card card-modern mb-3">
               <div class="card-header bg-transparent py-2 fw-bold">
@@ -797,9 +783,7 @@
             </div>
           </div>
 
-          <!-- ==========================================
-               4. TAB MASTER KODE KEGIATAN (Uraian_Kegiatan_Kwitansi)
-               ========================================== -->
+          <!-- TAB MASTER KODE KEGIATAN (Uraian_Kegiatan_Kwitansi) -->
           <div class="tab-pane fade" id="pane-kegiatan" role="tabpanel">
             <div class="card card-modern">
               <div class="card-header bg-transparent py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -828,9 +812,7 @@
             </div>
           </div>
 
-          <!-- ==========================================
-               5. TAB MASTER KODE REKENING (Ref_Kode_Rekening)
-               ========================================== -->
+          <!-- TAB MASTER KODE REKENING (Ref_Kode_Rekening) -->
           <div class="tab-pane fade" id="pane-rekening" role="tabpanel">
             <div class="card card-modern">
               <div class="card-header bg-transparent py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -856,9 +838,7 @@
             </div>
           </div>
 
-          <!-- ==========================================
-               6. TAB MASTER PEGAWAI (Master_Pegawai)
-               ========================================== -->
+          <!-- TAB MASTER PEGAWAI (Master_Pegawai) -->
           <div class="tab-pane fade" id="pane-pegawai" role="tabpanel">
             <div class="card card-modern">
               <div class="card-header bg-transparent py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -881,9 +861,7 @@
             </div>
           </div>
 
-          <!-- ==========================================
-               7. TAB MASTER TOKO (Master_Toko)
-               ========================================== -->
+          <!-- TAB MASTER TOKO (Master_Toko) -->
           <div class="tab-pane fade" id="pane-toko" role="tabpanel">
             <div class="card card-modern">
               <div class="card-header bg-transparent py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -906,9 +884,7 @@
             </div>
           </div>
 
-          <!-- ==========================================
-               8. TAB PEJABAT SEKOLAH
-               ========================================== -->
+          <!-- TAB PEJABAT SEKOLAH -->
           <div class="tab-pane fade" id="pane-pejabat" role="tabpanel">
             <div class="card card-modern">
               <div class="card-header bg-transparent py-3">
@@ -1140,7 +1116,6 @@
             }
           });
         } else {
-          // Fallback jika readAll belum di-deploy: panggil satu per satu
           for (const name of Object.keys(dbCache)) {
             await muatSatuSheet(name);
           }
@@ -1183,7 +1158,7 @@
     }
 
     // =========================================================================
-    // 4. LOGIKA INTI PENYESUAIAN & CETAK LPJ (SESUAI SPESIFIKASI)
+    // 4. LOGIKA INTI PENYESUAIAN & CETAK LPJ
     // =========================================================================
     function initPanelCetak() {
       const bpuMap = new Map();
@@ -1205,7 +1180,6 @@
       });
       document.getElementById('select-bpu-list').innerHTML = opt;
 
-      // Isi dropdown toko
       let optToko = '<option value="">-- Pilih Toko dari Master_Toko --</option>';
       dbCache.Master_Toko.data.forEach((t, i) => {
         optToko += `<option value="${i}">${t[0]} (Pelayan: ${t[1] || '-'})</option>`;
@@ -1226,7 +1200,6 @@
         return;
       }
 
-      // Ambil informasi utama dari baris-baris BKU untuk BPU ini
       let totalPengeluaran = 0;
       bkuRows.forEach(r => totalPengeluaran += parseNominal(r[6]));
 
@@ -1235,12 +1208,10 @@
       const kodeKegiatanBku = (firstRow[1] || '').toString().trim();
       const kodeRekeningBku = (firstRow[2] || '').toString().trim();
 
-      // 1. CEK KODE REKENING PADA SHEET Ref_Kode_Rekening
       const refRekRow = dbCache.Ref_Kode_Rekening.data.find(
         r => bersihkanKode(r[0]) === bersihkanKode(kodeRekeningBku)
       );
 
-      // Reset tampilan peringatan
       document.getElementById('alert-rekening-missing').classList.add('d-none');
       document.getElementById('alert-belanja-modal').classList.add('d-none');
       document.getElementById('workspace-lpj').classList.add('d-none');
@@ -1259,7 +1230,6 @@
         uraianKegiatan: ''
       };
 
-      // JIKA KODE REKENING TIDAK DITEMUKAN DI Ref_Kode_Rekening
       if (!refRekRow) {
         document.getElementById('text-rekening-missing').innerHTML =
           `Nomor Bukti <b>${activeBPU.noBukti}</b> memiliki Kode Rekening <code>${kodeRekeningBku}</code> (Uraian BKU: <i>${firstRow[4]}</i>) yang belum terdaftar pada Sheet <b>Ref_Kode_Rekening</b>. Silakan input terlebih dahulu pada menu <b>Master Kode Rekening</b>.`;
@@ -1267,7 +1237,6 @@
         return;
       }
 
-      // JIKA KATEGORI ADALAH BELANJA MODAL -> BERITAHU MENGGUNAKAN SIPLAH
       const katLower = activeBPU.kategori.toLowerCase();
       if (katLower.includes('modal')) {
         document.getElementById('alert-belanja-modal').classList.remove('d-none');
@@ -1279,7 +1248,6 @@
         return;
       }
 
-      // 2. CARI URAIAN KEGIATAN DI SHEET Uraian_Kegiatan_Kwitansi
       const refKegRow = dbCache.Uraian_Kegiatan_Kwitansi.data.find(
         r => bersihkanKode(r[0]) === bersihkanKode(kodeKegiatanBku)
       );
@@ -1287,13 +1255,11 @@
       if (refKegRow) {
         activeBPU.uraianKegiatan = (refKegRow[1] || '').trim();
       } else {
-        // Fallback: cari di DB_ARKAS jika di Uraian_Kegiatan_Kwitansi belum diinput
         activeBPU.uraianKegiatan = cariNamaKegiatanDiArkas(kodeKegiatanBku);
         document.getElementById('kode-keg-missing-val').innerText = kodeKegiatanBku;
         document.getElementById('alert-kegiatan-missing').classList.remove('d-none');
       }
 
-      // Tampilkan Workspace Penyesuaian
       document.getElementById('workspace-lpj').classList.remove('d-none');
       document.getElementById('info-bpu-no').innerText = activeBPU.noBukti;
       document.getElementById('info-bpu-tgl').innerText = activeBPU.tglPanjang;
@@ -1304,7 +1270,6 @@
       const elPenerimaKwitansi = document.getElementById('kwitansi-penerima-input');
       delete elPenerimaKwitansi.dataset.manual;
 
-      // 3. PERCABANGAN OTOMATIS: BELANJA BARANG vs BELANJA JASA
       if (katLower.includes('barang')) {
         siapkanPenyesuaianBelanjaBarang();
       } else {
@@ -1314,9 +1279,8 @@
       renderLembarKerjaLPJ();
     }
 
-    // Helper mencari nama kegiatan langsung dari struktur 3 kolom DB_ARKAS jika belum ada di sheet Uraian_Kegiatan_Kwitansi
     function cariNamaKegiatanDiArkas(kodeKeg) {
-      const cleanTarget = bersihkanKode(kodeKeg); // contoh: "02.03.01"
+      const cleanTarget = bersihkanKode(kodeKeg);
       for (const r of dbCache.DB_ARKAS.data) {
         const rek = (r[1] || '').toString().trim();
         const p1 = (r[2] || '').toString().trim().replace(/,/g, '');
@@ -1346,33 +1310,28 @@
     }
 
     // =========================================================================
-    // 4A. PENYESUAIAN BELANJA BARANG (HARGA & VOLUME OTOMATIS DARI DB_ARKAS)
+    // 4A. PENYESUAIAN BELANJA BARANG
     // =========================================================================
     function siapkanPenyesuaianBelanjaBarang() {
       document.getElementById('section-penyesuaian-barang').classList.remove('d-none');
       document.getElementById('section-penyesuaian-jasa').classList.add('d-none');
 
-      // Rumus Uraian Kwitansi Belanja Barang:
-      // "Biaya Pembelian " + [Uraian Ref_Kode_Rekening] + " " + [Uraian_Kegiatan_Kwitansi]
       const gabunganUraian = `Biaya Pembelian ${activeBPU.uraianRekening} ${activeBPU.uraianKegiatan}`.replace(/\s+/g, ' ').trim();
       document.getElementById('kwitansi-uraian-input').value = gabunganUraian;
       document.getElementById('input-nota-nomor').value = `NOTA/${activeBPU.noBukti}`;
 
-      // Jika sudah ada toko terpilih, sinkronkan nama pelayan
       aksiPilihTokoNota();
 
       const tbody = document.getElementById('tbody-item-barang');
       tbody.innerHTML = '';
       let adaMultiHarga = false;
 
-      // Loop semua baris barang pada BPU tersebut di DB_BKU
       activeBPU.bkuRows.forEach((bkuRow, idx) => {
         const namaBarangBku = (bkuRow[4] || '').toString().trim();
         const jumlahUangBku = parseNominal(bkuRow[6]);
         const kodeKegBaris = bersihkanKode(bkuRow[1] || activeBPU.kodeKegiatan);
         const kodeRekBaris = bersihkanKode(bkuRow[2] || activeBPU.kodeRekening);
 
-        // Cari di DB_ARKAS: Kode_Program_1 == Kode_Kegiatan && Kode_Rekening == Kode_Rekening && Uraian cocok
         const namaClean = namaBarangBku.toLowerCase().replace(/[-_]+$/g, '').trim();
         let kandidatArkas = dbCache.DB_ARKAS.data.filter(ar => {
           const arRek = bersihkanKode(ar[1]);
@@ -1381,14 +1340,12 @@
           return arProg1 === kodeKegBaris && arRek === kodeRekBaris && (arUraian === namaClean || arUraian.includes(namaClean) || namaClean.includes(arUraian));
         });
 
-        // Jika tidak ada yang cocok spesifik nama, longgarkan ke Kode_Program_1 + Kode_Rekening
         if (kandidatArkas.length === 0) {
           kandidatArkas = dbCache.DB_ARKAS.data.filter(ar =>
             bersihkanKode(ar[2]) === kodeKegBaris && bersihkanKode(ar[1]) === kodeRekBaris && parseNominal(ar[8]) > 0
           );
         }
 
-        // Kumpulkan harga satuan unik dari kandidat DB_ARKAS
         const mapHargaUnik = new Map();
         kandidatArkas.forEach(ar => {
           const hrg = parseNominal(ar[8]);
@@ -1399,7 +1356,6 @@
         });
 
         const daftarHarga = Array.from(mapHargaUnik.values());
-        // Filter harga yang jika Jumlah_Uang_BKU dibagi Harga_Satuan hasilnya BULAT / PAS (tanpa koma)
         const daftarHargaGenap = daftarHarga.filter(item => jumlahUangBku > 0 && (jumlahUangBku % item.harga === 0));
 
         let hargaTerpilih = jumlahUangBku;
@@ -1409,18 +1365,15 @@
         let opsiUntukDropdown = [];
 
         if (daftarHarga.length === 1) {
-          // Hanya ada 1 harga di DB_ARKAS -> Langsung pakai tanpa form penyesuaian
           hargaTerpilih = daftarHarga[0].harga;
           satuanTerpilih = daftarHarga[0].satuan;
           volumeHitung = jumlahUangBku / hargaTerpilih;
         } else if (daftarHarga.length > 1) {
           if (daftarHargaGenap.length === 1) {
-            // Ada beberapa harga, tapi HANYA SATU yang menghasilkan pembagian bulat/pas -> Otomatis pakai!
             hargaTerpilih = daftarHargaGenap[0].harga;
             satuanTerpilih = daftarHargaGenap[0].satuan;
             volumeHitung = jumlahUangBku / hargaTerpilih;
           } else if (daftarHargaGenap.length > 1) {
-            // Semua/beberapa harga sama-sama menghasilkan pembagian bulat -> Munculkan form penyesuaian!
             perluFormPilihHarga = true;
             adaMultiHarga = true;
             opsiUntukDropdown = daftarHargaGenap;
@@ -1428,7 +1381,6 @@
             satuanTerpilih = daftarHargaGenap[0].satuan;
             volumeHitung = jumlahUangBku / hargaTerpilih;
           } else {
-            // Tidak ada yang bulat persis -> Munculkan semua kandidat harga
             perluFormPilihHarga = true;
             adaMultiHarga = true;
             opsiUntukDropdown = daftarHarga;
@@ -1445,10 +1397,7 @@
             const vPas = jumlahUangBku / op.harga;
             optHtml += `<option value="${op.harga}|${op.satuan}">Rp ${formatRibuan(op.harga)} / ${op.satuan} (Vol: ${vPas})</option>`;
           });
-          htmlKolomReferensi = `
-            <select class="form-select form-select-sm border-warning fw-semibold" onchange="pilihHargaArkasBarang(this, ${jumlahUangBku})">
-              ${optHtml}
-            </select>`;
+          htmlKolomReferensi = `<select class="form-select form-select-sm border-warning fw-semibold" onchange="pilihHargaArkasBarang(this, ${jumlahUangBku})">${optHtml}</select>`;
         } else if (daftarHarga.length >= 1) {
           htmlKolomReferensi = `<span class="badge bg-success-subtle text-success-emphasis"><i class="fa-solid fa-check me-1"></i>Cocok Otomatis (Rp ${formatRibuan(hargaTerpilih)})</span>`;
         } else {
@@ -1515,32 +1464,22 @@
     }
 
     // =========================================================================
-    // 4B. PENYESUAIAN BELANJA JASA (BARIS OTOMATIS DARI VOLUME DB_ARKAS)
-    // =========================================================================
-    // =========================================================================
-    // 4B. PENYESUAIAN BELANJA JASA (BARIS = TOTAL BKU / TARIF HARGA ARKAS
-    //     & PENERIMA KWITANSI OTOMATIS DARI BARIS PERTAMA MASTER PEGAWAI)
+    // 4B. PENYESUAIAN BELANJA JASA (BARIS = TOTAL BKU / TARIF HARGA ARKAS)
     // =========================================================================
     function siapkanPenyesuaianBelanjaJasa() {
       document.getElementById('section-penyesuaian-barang').classList.add('d-none');
       document.getElementById('section-penyesuaian-jasa').classList.remove('d-none');
 
-      // Reset kolom Nama Penerima Kwitansi agar tidak menyisakan nama dari BPU sebelumnya
       const elPenerimaKw = document.getElementById('kwitansi-penerima-input');
       elPenerimaKw.value = '';
       delete elPenerimaKw.dataset.manual;
 
-      // Rumus Uraian Kwitansi Belanja Jasa:
-      // "Biaya " + [Uraian Ref_Kode_Rekening] + " " + [Uraian_Kegiatan_Kwitansi]
       const uraianJasa = `Biaya ${activeBPU.uraianRekening} ${activeBPU.uraianKegiatan}`.replace(/\s+/g, ' ').trim();
       document.getElementById('kwitansi-uraian-input').value = uraianJasa;
 
-      // Rumus Judul Rincian Daftar Penerima Belanja Jasa:
-      // "DAFTAR PENERIMA " + [Uraian Ref_Kode_Rekening] + " " + [Uraian_Kegiatan_Kwitansi]
       const judulDaftar = `DAFTAR PENERIMA ${activeBPU.uraianRekening} ${activeBPU.uraianKegiatan}`.replace(/\s+/g, ' ').trim().toUpperCase();
       document.getElementById('input-judul-daftar-jasa').value = judulDaftar;
 
-      // Cocokkan Kode Kegiatan & Kode Rekening dengan DB_ARKAS untuk mengambil TARIF_HARGA (Harga Satuan)
       const kodeKegClean = bersihkanKode(activeBPU.kodeKegiatan);
       const kodeRekClean = bersihkanKode(activeBPU.kodeRekening);
       const uraianBkuClean = (activeBPU.bkuRows[0][4] || '').toString().toLowerCase().replace(/[-_]+$/g, '').trim();
@@ -1558,7 +1497,6 @@
 
       let sumberKandidat = kandidatUraianCocok.length > 0 ? kandidatUraianCocok : kandidatArkas;
 
-      // Pilih baris ARKAS yang Tarif_Harga-nya (kolom index 8) membagi habis Total BKU secara bulat/genap
       let kandidatGenap = sumberKandidat.filter(ar => {
         const tarif = parseNominal(ar[8]);
         const volMaxArkas = parseNominal(ar[6]) || 999;
@@ -1604,7 +1542,7 @@
       return html;
     }
 
-        function pilihPegawaiDariDropdown(selectEl) {
+    function pilihPegawaiDariDropdown(selectEl) {
       const tr = selectEl.closest('tr');
       const idx = selectEl.value;
       if (idx !== "" && dbCache.Master_Pegawai.data[idx]) {
@@ -1618,7 +1556,6 @@
         tr.querySelector('.jasa-status').value = '';
       }
 
-      // Jika yang diubah adalah baris pertama (index 0), paksa sinkron ke Penerima Kwitansi
       const allRows = Array.from(document.querySelectorAll('#tbody-item-jasa tr'));
       if (allRows.indexOf(tr) === 0) {
         const elPenerimaKw = document.getElementById('kwitansi-penerima-input');
@@ -1675,7 +1612,7 @@
       hitungTotalRincianJasa();
     }
 
-        function hitungTotalRincianJasa() {
+    function hitungTotalRincianJasa() {
       let totalRincian = 0;
       let namaBarisPertama = '';
 
@@ -1689,7 +1626,6 @@
         tr.querySelector('.jasa-jumlah-label').innerText = `Rp ${formatRibuan(sub)}`;
       });
 
-      // Otomatis isi Nama "Yang Menerima" di Kwitansi dari orang pada Baris Pertama (No. 1)
       const elPenerimaKw = document.getElementById('kwitansi-penerima-input');
       if (!elPenerimaKw.dataset.manual) {
         elPenerimaKw.value = namaBarisPertama;
@@ -1705,6 +1641,7 @@
       }
       renderLembarKerjaLPJ();
     }
+
     // =========================================================================
     // 5. GENERATOR DOKUMEN LPJ FORMAL (PERSIS CONTOH EXCEL PRINT PREVIEW)
     // =========================================================================
@@ -1723,7 +1660,6 @@
       const pisahHalaman = document.getElementById('switch-pisah-halaman').checked;
       const katLower = activeBPU.kategori.toLowerCase();
 
-      // 1. KOTAK NOMOR BPU DI POJOK KANAN ATAS (HANYA DI SINI SAJA) + KOTAK KWITANSI
       let html = `
         <div class="bpu-top-wrapper">
           <div class="bpu-top-box">${activeBPU.noBukti}</div>
@@ -1787,7 +1723,6 @@
         html += `<div class="html2pdf__page-break" style="page-break-before: always;"></div>`;
       }
 
-      // 2A. JIKA BELANJA JASA -> TABEL DAFTAR PENERIMA (TANPA KOTAK BPU LAGI)
       if (!katLower.includes('barang')) {
         const judulDaftar = document.getElementById('input-judul-daftar-jasa').value.trim();
         const sumberDana = document.getElementById('input-sumber-dana-jasa').value.trim();
@@ -1884,7 +1819,6 @@
           </div>
         `;
       } else {
-        // 2B. JIKA BELANJA BARANG -> NOTA RESMI TOKO DI BAWAH KWITANSI
         const idxToko = document.getElementById('select-nota-toko').value;
         const namaToko = (idxToko !== "" && dbCache.Master_Toko.data[idxToko]) ? dbCache.Master_Toko.data[idxToko][0] : 'TOKO / PENYEDIA BARANG';
         const telpToko = (idxToko !== "" && dbCache.Master_Toko.data[idxToko]) ? (dbCache.Master_Toko.data[idxToko][4] || '') : '';
@@ -1975,16 +1909,14 @@
       if (!activeBPU) return;
       const area = document.getElementById('print-area-a4');
       
-      // Simpan padding asli sebelum diubah
       const originalPadding = area.style.padding;
       const originalBoxShadow = area.style.boxShadow;
       
-      // Hilangkan bayangan dan sesuaikan padding khusus untuk mesin html2pdf
       area.style.padding = '0';
       area.style.boxShadow = 'none';
       
       const opt = {
-        margin:       [10, 15, 10, 15], // Margin: Atas, Kanan, Bawah, Kiri (dalam mm)
+        margin:       [10, 15, 10, 15], 
         filename:     `LPJ_${activeBPU.noBukti}_SDN1Sukahaji.pdf`,
         image:        { type: 'jpeg', quality: 1.0 },
         html2canvas:  { scale: 2, useCORS: true, windowWidth: 800 },
@@ -1992,11 +1924,11 @@
       };
       
       html2pdf().set(opt).from(area).save().then(() => {
-        // Kembalikan ke tampilan semula setelah selesai diunduh
         area.style.padding = originalPadding;
         area.style.boxShadow = originalBoxShadow;
       });
     }
+
     // =========================================================================
     // 6. TABEL & FULL CRUD UNTUK SELURUH 6 SHEET + SHORTCUT INPUT CEPAT
     // =========================================================================
@@ -2073,7 +2005,6 @@
         let val = prefillValues && prefillValues[i] !== undefined ? prefillValues[i] : (existingRow[i] !== undefined ? existingRow[i] : '');
         if (sheetName === 'DB_BKU' && i === 0) val = konversiSerialTanggal(val);
 
-        // Gunakan dropdown khusus untuk kolom Kategori pada Ref_Kode_Rekening
         if (sheetName === 'Ref_Kode_Rekening' && i === 2) {
           formHtml += `
             <div class="col-md-6">
@@ -2097,7 +2028,6 @@
       bsModalCRUD.show();
     }
 
-    // Shortcut langsung apabila Kode Rekening BPU belum terdaftar di Ref_Kode_Rekening
     function bukaModalTambahRekeningCepat() {
       if (!activeBPU) return;
       bukaModalCRUD(
@@ -2109,7 +2039,6 @@
       );
     }
 
-    // Shortcut langsung apabila Kode Kegiatan BPU belum terdaftar di Uraian_Kegiatan_Kwitansi
     function bukaModalTambahKegiatanCepat() {
       if (!activeBPU) return;
       bukaModalCRUD(
@@ -2196,7 +2125,6 @@
       }
     }
 
-    // Fitur Tarik Otomatis Kode Kegiatan dari 3 Kolom DB_ARKAS ke Uraian_Kegiatan_Kwitansi
     async function tarikOtomatisKegiatanDariArkas() {
       Swal.fire({ title: 'Menarik Kode Kegiatan dari DB_ARKAS...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
       try {
@@ -2219,7 +2147,7 @@
     }
 
     // =========================================================================
-    // 7. UNDUH TEMPLATE & UPLOAD CSV (BKU / ARKAS)
+    // 7. UNDUH TEMPLATE & UPLOAD CSV
     // =========================================================================
     function unduhTemplateCSV(sheetName) {
       const headers = getDefaultHeaderArray(sheetName).join(';') + '\n';
